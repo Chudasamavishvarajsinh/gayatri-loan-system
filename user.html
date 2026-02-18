@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="card">
+<h2>Apply Loan</h2>
+<input type="number" id="amount" placeholder="Amount">
+<input type="number" id="rate" placeholder="Interest %">
+<input type="number" id="months" placeholder="Months">
+<button onclick="applyLoan()">Apply Loan</button>
+
+<h3>EMI Calculator</h3>
+<button onclick="calculate()">Calculate EMI</button>
+<p id="emiResult"></p>
+</div>
+
+<script type="module" src="js/user.js"></script>
+<script src="js/emi.js"></script>
+</body>
+</html>
