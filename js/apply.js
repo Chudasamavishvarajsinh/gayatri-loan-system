@@ -1,26 +1,40 @@
 import { db } from "./firebase-config.js";
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp }
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-window.applyLoan = async function(){
+const btn = document.getElementById("applyBtn");
 
-const name=document.getElementById("name").value;
-const phone=document.getElementById("phone").value;
-const address=document.getElementById("address").value;
-const amount=parseFloat(document.getElementById("amount").value);
+btn.addEventListener("click", async () => {
 
-if(!name||!phone||!amount){
-alert("Fill all fields");
+const name = document.getElementById("name").value.trim();
+const phone = document.getElementById("phone").value.trim();
+const address = document.getElementById("address").value.trim();
+const amount = parseFloat(document.getElementById("amount").value);
+
+const msg = document.getElementById("msg");
+
+if(!name || !phone || !amount){
+msg.innerText = "Please fill all required fields.";
 return;
 }
+
+try{
 
 await addDoc(collection(db,"applications"),{
 name,
 phone,
 address,
-requestedAmount:amount,
+requestedAmount: amount,
 status:"pending",
-createdAt:new Date()
+meeting:"",
+createdAt: serverTimestamp()
 });
 
-alert("You have applied for a loan. Admin will contact you.");
+msg.innerText =
+"You have successfully applied for a loan. Admin will contact you.";
+
+}catch(error){
+msg.innerText = error.message;
 }
+
+});
