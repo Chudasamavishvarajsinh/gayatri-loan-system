@@ -1,37 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Register - Gayatri Electronic</title>
-<link rel="stylesheet" href="css/style.css">
+<title>Register</title>
+<style>
+body{font-family:Arial;background:#2a5298}
+.box{width:350px;background:white;margin:100px auto;padding:30px;border-radius:10px}
+input,button{width:100%;padding:10px;margin:10px 0}
+button{background:#007bff;color:white;border:none}
+</style>
 </head>
 <body>
 
-<div class="header">
-<h1>Gayatri Electronic</h1>
-<p>Chudasama Baldevsinh | 9924232759</p>
-</div>
-
-<div class="container">
-<div class="card">
-<h2>Create Account</h2>
-
-<input type="text" id="name" placeholder="Full Name">
+<div class="box">
+<h3>Register</h3>
 <input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password (min 6 characters)">
-
-<button onclick="register()">Create Account</button>
-
-<p style="text-align:center;margin-top:15px;">
-Already have account? <a href="index.html">Login</a>
-</p>
-
-</div>
+<input type="password" id="password" placeholder="Password">
+<button onclick="register()">Register</button>
+<p id="msg"></p>
 </div>
 
-<div class="footer">
-© 2026 Gayatri Electronic | Cash Loan Management
-</div>
-
-<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/user-auth.js"></script>
 </body>
 </html>
