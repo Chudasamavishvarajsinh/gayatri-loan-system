@@ -1,34 +1,35 @@
 import { db } from "./firebase-config.js";
-import { collection,onSnapshot }
+import { collection, getDocs }
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-window.checkStatus=function(){
+const btn = document.getElementById("checkBtn");
 
-const phone=document.getElementById("phone").value;
-const result=document.getElementById("result");
+btn.addEventListener("click", async ()=>{
 
-onSnapshot(collection(db,"accounts"),snapshot=>{
+const phone = document.getElementById("phone").value.trim();
+const result = document.getElementById("result");
+
+result.innerHTML="";
+
+const snapshot = await getDocs(collection(db,"applications"));
+
+let found = false;
+
 snapshot.forEach(docSnap=>{
-const data=docSnap.data();
+const data = docSnap.data();
 
-if(data.phone===phone){
+if(data.phone === phone){
+found = true;
 
-let balance=0;
-let html="<h3>Transaction History</h3><ul>";
-
-data.ledger.forEach(entry=>{
-if(entry.type==="credit") balance+=entry.amount;
-if(entry.type==="debit") balance-=entry.amount;
-
-const date=new Date(entry.date.seconds*1000);
-html+=`<li>${date.toDateString()} - ${entry.type} - ₹${entry.amount}</li>`;
-});
-
-html+="</ul>";
-html+=`<div class='balance-box'>Current Balance: ₹${balance}</div>`;
-
-result.innerHTML=html;
+result.innerHTML = `
+<p><strong>Status:</strong> ${data.status}</p>
+<p><strong>Loan Amount:</strong> ₹${data.requestedAmount}</p>
+<p><strong>Meeting:</strong> ${data.meeting || "Not Fixed"}</p>
+`;
 }
 });
-});
+
+if(!found){
+result.innerHTML = "<p>No record found.</p>";
 }
+});
