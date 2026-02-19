@@ -1,40 +1,88 @@
 import { db } from "./firebase-config.js";
-import { collection, addDoc, serverTimestamp }
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+collection,
+getDocs,
+updateDoc,
+doc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const btn = document.getElementById("applyBtn");
+const table = document.getElementById("appTable");
+const searchBtn = document.getElementById("searchBtn");
 
-btn.addEventListener("click", async () => {
+async function loadApplications(){
 
-const name = document.getElementById("name").value.trim();
-const phone = document.getElementById("phone").value.trim();
-const address = document.getElementById("address").value.trim();
-const amount = parseFloat(document.getElementById("amount").value);
+table.innerHTML="";
 
-const msg = document.getElementById("msg");
+const snapshot = await getDocs(collection(db,"applications"));
 
-if(!name || !phone || !amount){
-msg.innerText = "Please fill all required fields.";
-return;
+snapshot.forEach(docSnap=>{
+const data = docSnap.data();
+
+table.innerHTML += `
+<tr>
+<td>${data.name}</td>
+<td>${data.phone}</td>
+<td>${data.requestedAmount}</td>
+<td>${data.status}</td>
+<td>${data.meeting || "Not Fixed"}</td>
+<td>
+<button onclick="fixMeeting('${docSnap.id}')">Meeting</button>
+<button onclick="approve('${docSnap.id}')">Approve</button>
+</td>
+</tr>
+`;
+});
 }
 
-try{
+window.fixMeeting = async function(id){
 
-await addDoc(collection(db,"applications"),{
-name,
-phone,
-address,
-requestedAmount: amount,
-status:"pending",
-meeting:"",
-createdAt: serverTimestamp()
+const meeting = prompt("Enter Meeting Date & Time");
+
+if(!meeting) return;
+
+await updateDoc(doc(db,"applications",id),{
+meeting
 });
 
-msg.innerText =
-"You have successfully applied for a loan. Admin will contact you.";
-
-}catch(error){
-msg.innerText = error.message;
+alert("Meeting Updated");
+loadApplications();
 }
 
+window.approve = async function(id){
+
+await updateDoc(doc(db,"applications",id),{
+status:"approved"
 });
+
+alert("Loan Approved");
+loadApplications();
+}
+
+searchBtn.addEventListener("click", async ()=>{
+
+const phone = document.getElementById("searchPhone").value.trim();
+
+table.innerHTML="";
+
+const snapshot = await getDocs(collection(db,"applications"));
+
+snapshot.forEach(docSnap=>{
+const data = docSnap.data();
+
+if(data.phone === phone){
+
+table.innerHTML += `
+<tr>
+<td>${data.name}</td>
+<td>${data.phone}</td>
+<td>${data.requestedAmount}</td>
+<td>${data.status}</td>
+<td>${data.meeting || "Not Fixed"}</td>
+<td>Found</td>
+</tr>
+`;
+}
+});
+});
+
+loadApplications();
