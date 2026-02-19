@@ -3,9 +3,12 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, si
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_REAL_KEY",
-  authDomain: "YOUR_REAL_DOMAIN",
-  projectId: "YOUR_REAL_PROJECT_ID"
+  apiKey: "AIzaSyDg536DdCRGBTacV4wx1_asQ6NyOflX01I",
+  authDomain: "gayatri-loan-system.firebaseapp.com",
+  projectId: "gayatri-loan-system",
+  storageBucket: "gayatri-loan-system.firebasestorage.app",
+  messagingSenderId: "52394591148",
+  appId: "1:52394591148:web:11e859e4d0f411ec4af009"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -45,3 +48,4 @@ window.adminLogin = async function(){
     await signOut(auth);
   }
 }
+
