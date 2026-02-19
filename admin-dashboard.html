@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<style>
+body{font-family:Arial;background:#f4f4f4}
+.top{background:black;color:white;padding:15px}
+.logout{float:right;color:red;cursor:pointer}
+table{width:100%;background:white;margin-top:20px}
+td,th{padding:10px;border:1px solid #ddd}
+</style>
+</head>
+<body>
+
+<div class="top">
+Admin Dashboard
+<span class="logout" onclick="logout()">Logout</span>
+</div>
+
+<h3>Loan Applications</h3>
+<input type="text" id="search" placeholder="Search by phone" onkeyup="searchUser()">
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Amount</th>
+<th>Meeting</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="loanTable"></tbody>
+</table>
+
+<script type="module" src="js/admin-dashboard.js"></script>
+</body>
+</html>
