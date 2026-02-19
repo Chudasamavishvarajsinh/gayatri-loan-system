@@ -6,29 +6,24 @@
 </head>
 <body>
 
-<div class="sidebar">
-<h2>Gayatri Electronic</h2>
-<p>Chudasama Baldevsinh<br>9924232759</p>
-<a href="admin-login.html">Admin Login</a>
-<a href="report.html">Check Loan Status</a>
-</div>
-
-<div class="main">
+<header class="main-header">
+<h1>🪙 Gayatri Electronic</h1>
+<p>Chudasama Baldevsinh | 📞 9924232759</p>
+</header>
 
 <div class="card">
-<h2>Apply For Loan</h2>
+<h2>Apply for Loan</h2>
 
-<input type="text" id="name" placeholder="Full Name">
-<input type="text" id="phone" placeholder="Phone Number">
-<input type="text" id="address" placeholder="Address">
-<input type="number" id="amount" placeholder="Loan Amount">
+<input id="name" placeholder="Full Name">
+<input id="phone" placeholder="Phone Number">
+<input id="address" placeholder="Address">
+<input id="amount" type="number" placeholder="Loan Amount">
 
 <button onclick="applyLoan()">Submit Application</button>
+<a href="status.html">Check Loan Status</a>
 
 </div>
 
-</div>
-
-<script type="module" src="js/public.js"></script>
+<script type="module" src="js/apply.js"></script>
 </body>
 </html>
