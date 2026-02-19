@@ -1,92 +1,96 @@
 import { db } from "./firebase-config.js";
 import {
 collection,
-getDocs,
+onSnapshot,
 updateDoc,
-doc
+doc,
+addDoc,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const table = document.getElementById("appTable");
+const appTable=document.getElementById("appTable");
 
-window.loadApplications = async function(){
+window.loadApplications=function(){
 
-table.innerHTML="";
-
-const snapshot = await getDocs(collection(db,"applications"));
-
+onSnapshot(collection(db,"applications"),snapshot=>{
+appTable.innerHTML="";
 snapshot.forEach(docSnap=>{
-const data = docSnap.data();
+const data=docSnap.data();
 
-table.innerHTML += `
+appTable.innerHTML+=`
 <tr>
 <td>${data.name}</td>
 <td>${data.phone}</td>
-<td>${data.amount}</td>
+<td>${data.requestedAmount}</td>
 <td>${data.status}</td>
-<td>${data.meeting || "Not Fixed"}</td>
-<td>${data.interest || 0}</td>
-<td>${data.totalPayable || 0}</td>
+<td>${data.meeting||"Not Fixed"}</td>
 <td>
-<button onclick="approve('${docSnap.id}',${data.amount})">Approve</button>
-<button onclick="meeting('${docSnap.id}')">Meeting</button>
+<button onclick="fixMeeting('${docSnap.id}')">Meeting</button>
+<button onclick="createAccount('${docSnap.id}',${data.requestedAmount})">Approve</button>
 </td>
 </tr>
 `;
 });
+});
 }
 
-window.approve = async function(id,amount){
-
-const interest = amount * 0.10;
-const totalPayable = parseFloat(amount) + interest;
-
+window.fixMeeting=async function(id){
+const meeting=prompt("Enter Meeting Date & Time");
 await updateDoc(doc(db,"applications",id),{
-status:"approved",
-interest,
-totalPayable
+meeting
+});
+}
+
+window.createAccount=async function(id,amount){
+
+const snapshot=await getDocs(collection(db,"applications"));
+
+snapshot.forEach(async docSnap=>{
+if(docSnap.id===id){
+
+const data=docSnap.data();
+
+await addDoc(collection(db,"accounts"),{
+phone:data.phone,
+name:data.name,
+ledger:[
+{
+type:"credit",
+amount:amount,
+date:new Date()
+}
+]
 });
 
-alert("Loan Approved");
-loadApplications();
-}
-
-window.meeting = async function(id){
-
-const time = prompt("Enter Meeting Date & Time");
-
 await updateDoc(doc(db,"applications",id),{
-meeting:time
+status:"approved"
 });
-
-alert("Meeting Updated");
-loadApplications();
+}
+});
 }
 
-window.searchUser = async function(){
+window.addLedger=async function(){
 
-const phone = document.getElementById("searchPhone").value;
-table.innerHTML="";
+const phone=document.getElementById("ledgerPhone").value;
+const amount=parseFloat(document.getElementById("ledgerAmount").value);
+const type=document.getElementById("ledgerType").value;
 
-const snapshot = await getDocs(collection(db,"applications"));
+const snapshot=await getDocs(collection(db,"accounts"));
 
-snapshot.forEach(docSnap=>{
-const data = docSnap.data();
-
+snapshot.forEach(async docSnap=>{
+const data=docSnap.data();
 if(data.phone===phone){
-table.innerHTML += `
-<tr>
-<td>${data.name}</td>
-<td>${data.phone}</td>
-<td>${data.amount}</td>
-<td>${data.status}</td>
-<td>${data.meeting}</td>
-<td>${data.interest}</td>
-<td>${data.totalPayable}</td>
-<td>Found</td>
-</tr>
-`;
+
+let ledger=data.ledger;
+ledger.push({
+type,
+amount,
+date:new Date()
+});
+
+await updateDoc(doc(db,"accounts",docSnap.id),{
+ledger
+});
 }
 });
 }
-
-loadApplications();
