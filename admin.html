@@ -1,8 +1,27 @@
-<div class="card">
-<h2>Loan Applications</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
-<input type="text" id="searchPhone" placeholder="Search by phone">
+<header class="main-header">
+<h1>🪙 Gayatri Electronic - Admin Panel</h1>
+<p>Chudasama Baldevsinh | 📞 9924232759</p>
+</header>
+
+<div class="dashboard">
+
+<div class="sidebar">
+<h3>Admin Controls</h3>
+<button onclick="loadApplications()">All Applications</button>
+<input id="searchPhone" placeholder="Search by phone">
 <button onclick="searchUser()">Search</button>
+</div>
+
+<div class="content">
+<h2>Loan Applications</h2>
 
 <table>
 <thead>
@@ -12,10 +31,17 @@
 <th>Amount</th>
 <th>Status</th>
 <th>Meeting</th>
-<th>Action</th>
+<th>Interest</th>
+<th>Total</th>
+<th>Actions</th>
 </tr>
 </thead>
 <tbody id="appTable"></tbody>
 </table>
 
 </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
