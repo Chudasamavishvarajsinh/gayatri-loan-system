@@ -3,11 +3,13 @@ import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://ww
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_ID"
+  apiKey: "AIzaSyDg536DdCRGBTacV4wx1_asQ6NyOflX01I",
+  authDomain: "gayatri-loan-system.firebaseapp.com",
+  projectId: "gayatri-loan-system",
+  storageBucket: "gayatri-loan-system.firebasestorage.app",
+  messagingSenderId: "52394591148",
+  appId: "1:52394591148:web:11e859e4d0f411ec4af009"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
