@@ -1,28 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Admin Dashboard</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-
-<div class="sidebar">
-<h2>Gayatri Electronic</h2>
-<p>Admin Panel<br>9924232759</p>
-<a href="#">Dashboard</a>
-<a href="#">Applications</a>
-<a href="index.html">Logout</a>
-</div>
-
-<div class="main">
-
-<div class="card">
-<h2>Total Applications</h2>
-<p id="totalCount"></p>
-</div>
-
 <div class="card">
 <h2>Loan Applications</h2>
+
+<input type="text" id="searchPhone" placeholder="Search by phone">
+<button onclick="searchUser()">Search</button>
 
 <table>
 <thead>
@@ -31,6 +11,7 @@
 <th>Phone</th>
 <th>Amount</th>
 <th>Status</th>
+<th>Meeting</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -38,9 +19,3 @@
 </table>
 
 </div>
-
-</div>
-
-<script type="module" src="js/admin.js"></script>
-</body>
-</html>
