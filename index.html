@@ -1,35 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login - Gayatri Electronic</title>
+<title>Gayatri Electronic - Apply Loan</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="header">
-<h1>Gayatri Electronic</h1>
-<p>Chudasama Baldevsinh | 9924232759</p>
+<div class="sidebar">
+<h2>Gayatri Electronic</h2>
+<p>Chudasama Baldevsinh<br>9924232759</p>
+<a href="admin-login.html">Admin Login</a>
+<a href="report.html">Check Loan Status</a>
 </div>
 
-<div class="container">
+<div class="main">
+
 <div class="card">
-<h2>User Login</h2>
+<h2>Apply For Loan</h2>
 
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
+<input type="text" id="name" placeholder="Full Name">
+<input type="text" id="phone" placeholder="Phone Number">
+<input type="text" id="address" placeholder="Address">
+<input type="number" id="amount" placeholder="Loan Amount">
 
-<button onclick="login()">Login</button>
+<button onclick="applyLoan()">Submit Application</button>
 
-<p style="text-align:center;margin-top:15px;">
-No account? <a href="register.html">Register</a>
-</p>
-</div>
 </div>
 
-<div class="footer">
-© 2026 Gayatri Electronic | Cash Loan Management
 </div>
 
-<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/public.js"></script>
 </body>
 </html>
