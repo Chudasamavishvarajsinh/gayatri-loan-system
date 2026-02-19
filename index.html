@@ -1,45 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Gayatri Electronic - Apply Loan</title>
-<link rel="stylesheet" href="css/style.css">
+<title>Gayatri Electronic - Finance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+}
+.header{
+    background:black;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+.admin-btn{
+    position:absolute;
+    left:20px;
+    top:20px;
+    background:#ff9800;
+    padding:8px 15px;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+}
+.login-box{
+    width:350px;
+    background:white;
+    margin:100px auto;
+    padding:30px;
+    border-radius:10px;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+}
+button{
+    width:100%;
+    padding:10px;
+    background:#28a745;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+a{color:blue;cursor:pointer;}
+</style>
 </head>
 <body>
 
-<header>
-<h1>🪙 Gayatri Electronic</h1>
-<div class="company-info">
-Chudasama Baldevsinh | 📞 9924232759 <br>
-Gayatri Electronics, Besides Chamunda Games Store,
-Opp. Pir Ni Dargah, Street No 5,
-Khodiyar Colony, Jamnagar
-</div>
-</header>
+<a href="admin-login.html" class="admin-btn">Admin</a>
 
-<div class="container">
-<div class="card">
-<h2>Apply For Loan</h2>
-
-<input id="name" placeholder="Full Name">
-<input id="phone" placeholder="Phone Number">
-<input id="address" placeholder="Address">
-<input id="amount" type="number" placeholder="Loan Amount">
-
-<button onclick="applyLoan()">Submit Application</button>
-<p id="msg" style="color:green;"></p>
-
-<hr>
-
-<button onclick="window.location.href='admin-login.html'">
-Admin Login
-</button>
-
-
-</div>
+<div class="header">
+<h2>Gayatri Electronic</h2>
+<p>Chudasama Baldevsinh | 9924232759</p>
+<p>Gayatri Electronics, Besides Chamunda Games Store, Opp. Pir Ni Dargah, Street No 5, Khodiyar Colony, Jamnagar</p>
 </div>
 
-<script type="module" src="js/apply.js"></script>
+<div class="login-box">
+<h3>User Login</h3>
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<p id="msg"></p>
+
+<p>New user? <a href="register.html">Register</a></p>
+</div>
+
+<script type="module" src="js/user-auth.js"></script>
 </body>
 </html>
-
-
