@@ -6,13 +6,19 @@
 </head>
 <body>
 
-<header class="main-header">
+<header>
 <h1>🪙 Gayatri Electronic</h1>
-<p>Chudasama Baldevsinh | 📞 9924232759</p>
+<div class="company-info">
+Chudasama Baldevsinh | 📞 9924232759 <br>
+Gayatri Electronics, Besides Chamunda Games Store,
+Opp. Pir Ni Dargah, Street No 5,
+Khodiyar Colony, Jamnagar
+</div>
 </header>
 
+<div class="container">
 <div class="card">
-<h2>Apply for Loan</h2>
+<h2>Apply For Loan</h2>
 
 <input id="name" placeholder="Full Name">
 <input id="phone" placeholder="Phone Number">
@@ -20,8 +26,13 @@
 <input id="amount" type="number" placeholder="Loan Amount">
 
 <button onclick="applyLoan()">Submit Application</button>
-<a href="status.html">Check Loan Status</a>
 
+<hr>
+<button onclick="window.location.href='admin-login.html'">
+Admin Login
+</button>
+
+</div>
 </div>
 
 <script type="module" src="js/apply.js"></script>
