@@ -2,29 +2,18 @@
 <html>
 <head>
 <title>Admin Dashboard</title>
-<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<header>
-<h1>🪙 Gayatri Electronic - Admin Panel</h1>
-</header>
+<h2>Admin Dashboard</h2>
 
-<div class="dashboard">
+<button onclick="logout()">Logout</button>
 
-<div class="sidebar">
-<h3>Admin Controls</h3>
-<button onclick="loadApplications()">Applications</button>
-<button onclick="loadAccounts()">Loan Accounts</button>
-<input id="searchPhone" placeholder="Search Phone">
-<button onclick="searchAccount()">Search</button>
-</div>
+<h3>Search By Phone</h3>
+<input type="text" id="searchPhone">
+<button onclick="searchUser()">Search</button>
 
-<div class="content">
-
-<div class="card">
-<h2>Applications</h2>
-<table>
+<table border="1">
 <thead>
 <tr>
 <th>Name</th>
@@ -32,27 +21,12 @@
 <th>Amount</th>
 <th>Status</th>
 <th>Meeting</th>
-<th>Action</th>
 </tr>
 </thead>
-<tbody id="appTable"></tbody>
+<tbody id="adminTable"></tbody>
 </table>
-</div>
-
-<div class="card">
-<h2>Ledger Update</h2>
-<input id="ledgerPhone" placeholder="Phone">
-<input id="ledgerAmount" type="number" placeholder="Amount">
-<select id="ledgerType">
-<option value="credit">Credit (Loan Given)</option>
-<option value="debit">Debit (Payment Received)</option>
-</select>
-<button onclick="addLedger()">Add Entry</button>
-</div>
-
-</div>
-</div>
 
 <script type="module" src="js/admin.js"></script>
+
 </body>
 </html>
