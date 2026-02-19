@@ -1,21 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>User Dashboard</title>
+<title>User Dashboard - Gayatri Electronic</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<div class="header">
+<h1>Gayatri Electronic</h1>
+<p>Chudasama Baldevsinh | 9924232759</p>
+</div>
+
+<div class="container">
 <div class="card">
-<h2>Apply Loan</h2>
-<input type="number" id="amount" placeholder="Amount">
+<h2>Apply for Loan</h2>
+
+<input type="number" id="amount" placeholder="Loan Amount">
 <input type="number" id="rate" placeholder="Interest %">
 <input type="number" id="months" placeholder="Months">
+
 <button onclick="applyLoan()">Apply Loan</button>
 
-<h3>EMI Calculator</h3>
+<h3 style="margin-top:20px;">EMI Calculator</h3>
 <button onclick="calculate()">Calculate EMI</button>
 <p id="emiResult"></p>
+
+</div>
+</div>
+
+<div class="footer">
+User Panel | Gayatri Electronic
 </div>
 
 <script type="module" src="js/user.js"></script>
