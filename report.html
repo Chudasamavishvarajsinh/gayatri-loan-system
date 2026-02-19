@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Check Loan Status</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="main" style="margin-left:0;">
+<div class="card">
+<h2>Check Loan Status</h2>
+
+<input type="text" id="phone" placeholder="Enter Your Phone">
+<button onclick="checkStatus()">Check</button>
+
+<div id="result"></div>
+
+</div>
+</div>
+
+<script type="module">
+
+import { db } from "./js/firebase-config.js";
+import { collection, getDocs }
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+window.checkStatus = async function(){
+
+const phone=document.getElementById("phone").value;
+const snapshot=await getDocs(collection(db,"applications"));
+
+snapshot.forEach(docSnap=>{
+const data=docSnap.data();
+
+if(data.phone===phone){
+document.getElementById("result").innerHTML=`
+<p>Status: ${data.status}</p>
+<p>Interest: ₹${data.interest}</p>
+<p>Total Payable: ₹${data.totalPayable}</p>
+<p>Meeting: ${data.meeting}</p>
+`;
+}
+});
+}
+
+</script>
+
+</body>
+</html>
