@@ -1,35 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Dashboard - Gayatri Electronic</title>
+<title>Admin Dashboard</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <div class="sidebar">
 <h2>Gayatri Electronic</h2>
-<p>Admin Panel<br>Chudasama Baldevsinh<br>9924232759</p>
-
+<p>Admin Panel<br>9924232759</p>
 <a href="#">Dashboard</a>
-<a href="#">Loan Applications</a>
+<a href="#">Applications</a>
 <a href="index.html">Logout</a>
 </div>
 
 <div class="main">
 
 <div class="card">
-<h2>All Loan Applications</h2>
+<h2>Total Applications</h2>
+<p id="totalCount"></p>
+</div>
+
+<div class="card">
+<h2>Loan Applications</h2>
 
 <table>
 <thead>
 <tr>
+<th>Name</th>
+<th>Phone</th>
 <th>Amount</th>
-<th>Rate</th>
-<th>Months</th>
 <th>Status</th>
+<th>Action</th>
 </tr>
 </thead>
-<tbody id="loanTable"></tbody>
+<tbody id="appTable"></tbody>
 </table>
 
 </div>
