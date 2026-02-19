@@ -6,17 +6,16 @@
 </head>
 <body>
 
-<div class="main" style="margin-left:0;">
+<header class="main-header">
+<h1>Admin Login</h1>
+</header>
+
 <div class="card">
-<h2>Admin Login</h2>
-
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-</div>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="loginAdmin()">Login</button>
 </div>
 
-<script type="module" src="js/admin-auth.js"></script>
+<script type="module" src="js/admin-login.js"></script>
 </body>
 </html>
