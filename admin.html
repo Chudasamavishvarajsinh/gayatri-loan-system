@@ -6,23 +6,24 @@
 </head>
 <body>
 
-<header class="main-header">
+<header>
 <h1>🪙 Gayatri Electronic - Admin Panel</h1>
-<p>Chudasama Baldevsinh | 📞 9924232759</p>
 </header>
 
 <div class="dashboard">
 
 <div class="sidebar">
 <h3>Admin Controls</h3>
-<button onclick="loadApplications()">All Applications</button>
-<input id="searchPhone" placeholder="Search by phone">
-<button onclick="searchUser()">Search</button>
+<button onclick="loadApplications()">Applications</button>
+<button onclick="loadAccounts()">Loan Accounts</button>
+<input id="searchPhone" placeholder="Search Phone">
+<button onclick="searchAccount()">Search</button>
 </div>
 
 <div class="content">
-<h2>Loan Applications</h2>
 
+<div class="card">
+<h2>Applications</h2>
 <table>
 <thead>
 <tr>
@@ -31,13 +32,23 @@
 <th>Amount</th>
 <th>Status</th>
 <th>Meeting</th>
-<th>Interest</th>
-<th>Total</th>
-<th>Actions</th>
+<th>Action</th>
 </tr>
 </thead>
 <tbody id="appTable"></tbody>
 </table>
+</div>
+
+<div class="card">
+<h2>Ledger Update</h2>
+<input id="ledgerPhone" placeholder="Phone">
+<input id="ledgerAmount" type="number" placeholder="Amount">
+<select id="ledgerType">
+<option value="credit">Credit (Loan Given)</option>
+<option value="debit">Debit (Payment Received)</option>
+</select>
+<button onclick="addLedger()">Add Entry</button>
+</div>
 
 </div>
 </div>
