@@ -6,12 +6,18 @@
 </head>
 <body>
 
-<div class="header">
-<h1>Gayatri Electronic</h1>
-<p>Chudasama Baldevsinh | 9924232759</p>
+<div class="sidebar">
+<h2>Gayatri Electronic</h2>
+<p>Chudasama Baldevsinh<br>9924232759</p>
+
+<a href="#">Dashboard</a>
+<a href="#">Apply Loan</a>
+<a href="#">EMI Calculator</a>
+<a href="index.html">Logout</a>
 </div>
 
-<div class="container">
+<div class="main">
+
 <div class="card">
 <h2>Apply for Loan</h2>
 
@@ -20,16 +26,15 @@
 <input type="number" id="months" placeholder="Months">
 
 <button onclick="applyLoan()">Apply Loan</button>
+</div>
 
-<h3 style="margin-top:20px;">EMI Calculator</h3>
+<div class="card">
+<h2>EMI Calculator</h2>
+
 <button onclick="calculate()">Calculate EMI</button>
-<p id="emiResult"></p>
-
-</div>
+<p id="emiResult" style="margin-top:15px;"></p>
 </div>
 
-<div class="footer">
-User Panel | Gayatri Electronic
 </div>
 
 <script type="module" src="js/user.js"></script>
