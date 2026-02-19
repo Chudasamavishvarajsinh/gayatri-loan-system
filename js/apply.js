@@ -3,13 +3,13 @@ import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 
 window.applyLoan = async function(){
 
-const name = document.getElementById("name").value;
-const phone = document.getElementById("phone").value;
-const address = document.getElementById("address").value;
-const amount = document.getElementById("amount").value;
+const name=document.getElementById("name").value;
+const phone=document.getElementById("phone").value;
+const address=document.getElementById("address").value;
+const amount=parseFloat(document.getElementById("amount").value);
 
-if(!name || !phone || !amount){
-alert("Fill all required fields");
+if(!name||!phone||!amount){
+alert("Fill all fields");
 return;
 }
 
@@ -17,11 +17,10 @@ await addDoc(collection(db,"applications"),{
 name,
 phone,
 address,
-amount: parseFloat(amount),
+requestedAmount:amount,
 status:"pending",
-createdAt: new Date()
+createdAt:new Date()
 });
 
-alert("Application Submitted Successfully");
-location.reload();
+alert("You have applied for a loan. Admin will contact you.");
 }
