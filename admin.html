@@ -6,20 +6,34 @@
 </head>
 <body>
 
-<div class="header">
-<h1>Gayatri Electronic - Admin Panel</h1>
-<p>Chudasama Baldevsinh | 9924232759</p>
+<div class="sidebar">
+<h2>Gayatri Electronic</h2>
+<p>Admin Panel<br>Chudasama Baldevsinh<br>9924232759</p>
+
+<a href="#">Dashboard</a>
+<a href="#">Loan Applications</a>
+<a href="index.html">Logout</a>
 </div>
 
-<div class="container">
-<div class="card" style="width:600px;">
-<h2>Loan Applications</h2>
-<table id="loanTable" border="1" width="100%"></table>
-</div>
+<div class="main">
+
+<div class="card">
+<h2>All Loan Applications</h2>
+
+<table>
+<thead>
+<tr>
+<th>Amount</th>
+<th>Rate</th>
+<th>Months</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="loanTable"></tbody>
+</table>
+
 </div>
 
-<div class="footer">
-Admin Panel | Gayatri Electronic
 </div>
 
 <script type="module" src="js/admin.js"></script>
