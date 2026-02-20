@@ -1,67 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard - Gayatri Electronics</title>
+    <title>Admin Login - Gayatri Electronics</title>
+
     <style>
         body {
-            font-family: Arial;
-            background: #f2f2f2;
-            padding: 40px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
         }
 
-        .card {
-            background: white;
-            padding: 25px;
-            max-width: 500px;
-            margin: auto;
+        .top-bar {
+            background: #000;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .login-box {
+            width: 350px;
+            margin: 100px auto;
+            background: #fff;
+            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
         }
 
-        button {
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .danger {
-            background: red;
-            color: white;
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         input {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .back-link {
+            text-align: center;
             margin-top: 10px;
+        }
+
+        .back-link a {
+            text-decoration: none;
+            color: #007bff;
         }
     </style>
 </head>
+
 <body>
 
-<div class="card">
-    <h2>Admin Dashboard</h2>
-
-    <button class="primary" onclick="toggleCreateAdmin()">Create New Admin</button>
-    <button class="danger" onclick="logout()">Logout</button>
-
-    <div id="createAdminSection" style="display:none; margin-top:20px;">
-        <h3>Create Another Admin</h3>
-
-        <input type="email" id="newAdminEmail" placeholder="Admin Email">
-        <input type="password" id="newAdminPassword" placeholder="Password (min 6 chars)">
-
-        <button class="primary" onclick="createAdmin()">Create Admin</button>
-    </div>
-
+<div class="top-bar">
+    <h1>Gayatri Electronics</h1>
+    <p>Chudasama Baldevsinh | 📞 9924232759</p>
+    <p>Beside Chamunda Games Store, Opp. Pir Ni Dargah, Street No 5, Jamnagar</p>
 </div>
 
-<script type="module" src="js/admin-dashboard.js"></script>
+<div class="login-box">
+    <h2>Admin Login</h2>
+
+    <input type="email" id="email" placeholder="Admin Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="adminLogin()">Login</button>
+
+    <div class="back-link">
+        <a href="index.html">← Back to User Login</a>
+    </div>
+</div>
+
+<script type="module" src="js/admin-auth.js"></script>
 
 </body>
 </html>
