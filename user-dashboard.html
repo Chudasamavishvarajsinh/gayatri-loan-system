@@ -3,28 +3,22 @@
 <head>
 <title>User Dashboard</title>
 <style>
-body{font-family:Arial;background:#f5f5f5}
-.top{background:black;color:white;padding:15px}
-.container{padding:40px;text-align:center}
-button{padding:15px 30px;margin:15px;font-size:16px}
-.logout{float:right;color:red;cursor:pointer}
+body { font-family:Arial; padding:30px; background:#f2f2f2; }
+.card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; }
+button { padding:10px; background:#007bff; color:white; border:none; }
 </style>
 </head>
 <body>
 
-<div class="top">
-User Dashboard
-<span class="logout" onclick="logout()">Logout</span>
-</div>
+<h1>User Dashboard</h1>
+<button onclick="logout()">Logout</button>
 
-<div class="container">
-<h3>Welcome</h3>
-<button onclick="location.href='apply.html'">Apply For Loan</button>
-<button onclick="location.href='history.html'">View My History</button>
-
-<div id="meeting"></div>
+<div class="card">
+<h2>My Loans</h2>
+<div id="loanDetails"></div>
 </div>
 
 <script type="module" src="js/user-dashboard.js"></script>
+
 </body>
 </html>
