@@ -1,31 +1,56 @@
-import { auth, db } from "./firebase-config.js";
+import { auth } from "./firebase-config.js";
 
-window.login = function(){
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+/* 🔹 Register */
+window.register = async function(){
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  signInWithEmailAndPassword(auth,email,password)
-  .then(()=>{
-    alert("Login successful");
+  if(!email || !password){
+    alert("Fill all fields");
+    return;
+  }
+
+  try{
+    await createUserWithEmailAndPassword(auth,email,password);
+    alert("Registration Successful");
+    window.location="index.html";
+  }catch(error){
+    alert(error.message);
+  }
+};
+
+
+/* 🔹 Login */
+window.login = async function(){
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if(!email || !password){
+    alert("Fill all fields");
+    return;
+  }
+
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    alert("Login Successful");
     window.location="user-dashboard.html";
-  })
-  .catch(e=>document.getElementById("msg").innerText=e.message);
-}
+  }catch(error){
+    alert(error.message);
+  }
+};
 
-window.register = function(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
 
-  createUserWithEmailAndPassword(auth,email,password)
-  .then(()=>{
-    alert("Registration successful");
-    window.location="index.html";
-  })
-  .catch(e=>document.getElementById("msg").innerText=e.message);
-}
-
-window.logout = function(){
-  signOut(auth).then(()=>{
-    window.location="index.html";
-  });
-}
+/* 🔹 Logout */
+window.logout = async function(){
+  await signOut(auth);
+  window.location="index.html";
+};
