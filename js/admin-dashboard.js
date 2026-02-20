@@ -1,58 +1,80 @@
 import { auth, db } from "./firebase-config.js";
 
-import { createUserWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { 
+    createUserWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import { doc, setDoc } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+    doc,
+    setDoc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-auth.onAuthStateChanged(user=>{
-  if(!user){
-    window.location="admin-login.html";
-  }
+
+/* 🔒 Protect Dashboard */
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location = "admin-login.html";
+        return;
+    }
+
+    const adminDoc = await getDoc(doc(db, "admins", user.uid));
+
+    if (!adminDoc.exists()) {
+        alert("Access Denied");
+        await signOut(auth);
+        window.location = "admin-login.html";
+    }
 });
 
-window.logout=function(){
-  signOut(auth).then(()=>{
-    window.location="index.html";
-  });
-}
 
-const table=document.getElementById("loanTable");
+/* Toggle Create Admin Section */
+window.toggleCreateAdmin = function() {
+    const section = document.getElementById("createAdminSection");
+    section.style.display = section.style.display === "none" ? "block" : "none";
+};
 
-onSnapshot(collection(db,"loans"),(snapshot)=>{
-  let html="";
-  snapshot.forEach(docSnap=>{
-    const data=docSnap.data();
-    html+=`
-    <tr>
-    <td>${data.name}</td>
-    <td>${data.phone}</td>
-    <td>${data.amount}</td>
-    <td>${data.meeting || "Not Set"}</td>
-    <td>
-    <button onclick="setMeeting('${docSnap.id}')">Set Meeting</button>
-    </td>
-    </tr>
-    `;
-  });
-  table.innerHTML=html;
-});
 
-window.setMeeting=async function(id){
-  const meeting=prompt("Enter Meeting Date & Time");
-  if(meeting){
-    await updateDoc(doc(db,"loans",id),{
-      meeting:meeting,
-      status:"Meeting Scheduled"
-    });
-  }
-}
+/* Create New Admin */
+window.createAdmin = async function() {
 
-window.searchUser=function(){
-  const value=document.getElementById("search").value.toLowerCase();
-  const rows=document.querySelectorAll("#loanTable tr");
-  rows.forEach(row=>{
-    row.style.display=row.innerText.toLowerCase().includes(value) ? "" : "none";
-  });
-}
+    const currentAdmin = auth.currentUser;
+
+    const email = document.getElementById("newAdminEmail").value;
+    const password = document.getElementById("newAdminPassword").value;
+
+    if (!email || !password) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+
+        await setDoc(doc(db, "admins", userCred.user.uid), {
+            email: email,
+            role: "admin",
+            createdAt: new Date()
+        });
+
+        alert("New Admin Created Successfully");
+
+        // Keep original admin logged in
+        await auth.updateCurrentUser(currentAdmin);
+
+        document.getElementById("newAdminEmail").value = "";
+        document.getElementById("newAdminPassword").value = "";
+
+    } catch (error) {
+        alert(error.message);
+    }
+};
+
+
+/* Logout */
+window.logout = async function() {
+    await signOut(auth);
+    window.location = "admin-login.html";
+};
