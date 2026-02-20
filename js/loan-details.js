@@ -10,8 +10,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
-  orderBy
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 window.goBack = function () {
@@ -41,7 +40,7 @@ onAuthStateChanged(auth, async (user) => {
 
   try {
 
-    // Fetch Loan Document
+    // Fetch loan document
     const loanRef = doc(db, "loans", loanId);
     const loanSnap = await getDoc(loanRef);
 
@@ -53,7 +52,7 @@ onAuthStateChanged(auth, async (user) => {
 
     const loan = loanSnap.data();
 
-    // Security: Make sure user owns this loan
+    // Security check
     if (loan.userId !== user.uid) {
       alert("Unauthorized access");
       window.location = "user-dashboard.html";
@@ -72,11 +71,11 @@ onAuthStateChanged(auth, async (user) => {
       <p><strong>Closed Date:</strong> ${loan.closedDate || "-"}</p>
     `;
 
-    // Fetch Ledger Entries
+    // Fetch Ledger Entries (NO orderBy to avoid index issue)
     const ledgerQuery = query(
-  collection(db, "ledger"),
-  where("loanId", "==", loanId)
-);
+      collection(db, "ledger"),
+      where("loanId", "==", loanId)
+    );
 
     const ledgerSnap = await getDocs(ledgerQuery);
 
@@ -93,7 +92,7 @@ onAuthStateChanged(auth, async (user) => {
         </tr>
     `;
 
-    // First row = Loan Given (Debit)
+    // First Row → Loan Given
     tableHTML += `
       <tr>
         <td>${loan.startDate || "-"}</td>
@@ -104,9 +103,21 @@ onAuthStateChanged(auth, async (user) => {
       </tr>
     `;
 
-    ledgerSnap.forEach((docSnap) => {
+    // Collect entries
+    let entries = [];
 
-      const entry = docSnap.data();
+    ledgerSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data.date && data.amount) {
+        entries.push(data);
+      }
+    });
+
+    // Sort entries by date (YYYY-MM-DD format expected)
+    entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Add payment rows
+    entries.forEach((entry) => {
 
       balance -= entry.amount;
 
