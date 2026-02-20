@@ -27,7 +27,7 @@ window.adminLogin = async function(){
 
     if(adminDoc.exists()){
         alert("Admin Login Successful");
-        window.location="admin-dashboard.html";
+        window.location = "admin.html";
     } else {
         alert("You are not an admin");
         await signOut(auth);
@@ -38,3 +38,4 @@ window.adminLogin = async function(){
   }
 
 };
+
