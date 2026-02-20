@@ -17,6 +17,21 @@ Admin Dashboard
 <span class="logout" onclick="logout()">Logout</span>
 </div>
 
+  <h2>Admin Dashboard</h2>
+
+<button onclick="toggleCreateAdmin()">Create New Admin</button>
+
+<div id="createAdminSection" style="display:none; margin-top:20px;">
+    <h3>Create Another Admin</h3>
+
+    <input type="email" id="newAdminEmail" placeholder="Admin Email">
+    <br><br>
+
+    <input type="password" id="newAdminPassword" placeholder="Password">
+    <br><br>
+
+    <button onclick="createAdmin()">Create Admin</button>
+</div>
 <h3>Loan Applications</h3>
 <input type="text" id="search" placeholder="Search by phone" onkeyup="searchUser()">
 
