@@ -74,10 +74,9 @@ onAuthStateChanged(auth, async (user) => {
 
     // Fetch Ledger Entries
     const ledgerQuery = query(
-      collection(db, "ledger"),
-      where("loanId", "==", loanId),
-      orderBy("date")
-    );
+  collection(db, "ledger"),
+  where("loanId", "==", loanId)
+);
 
     const ledgerSnap = await getDocs(ledgerQuery);
 
