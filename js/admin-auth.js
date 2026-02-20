@@ -1,40 +1,40 @@
-import { auth } from "./firebase-config.js";
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// js/admin-auth.js
 
-window.createAdmin = async function(){
+import { auth, db } from "./firebase-config.js";
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+import { 
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  const userCred = await createUserWithEmailAndPassword(auth,email,password);
+import { 
+  doc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  await setDoc(doc(db,"admins",userCred.user.uid),{
-    email:email,
-    role:"admin"
-  });
-
-  alert("Admin Created Successfully");
-  window.location="admin-login.html";
-}
 
 window.adminLogin = async function(){
 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const userCred = await signInWithEmailAndPassword(auth,email,password);
+  try {
 
-  const adminDoc = await getDoc(doc(db,"admins",userCred.user.uid));
+    const userCred = await signInWithEmailAndPassword(auth,email,password);
 
-  if(adminDoc.exists()){
-    alert("Admin Login Successful");
-    window.location="admin-dashboard.html";
-  }else{
-    alert("Not an admin");
-    await signOut(auth);
+    const adminRef = doc(db,"admins",userCred.user.uid);
+    const adminDoc = await getDoc(adminRef);
+
+    if(adminDoc.exists()){
+        alert("Admin Login Successful");
+        window.location="admin-dashboard.html";
+    } else {
+        alert("You are not an admin");
+        await signOut(auth);
+    }
+
+  } catch(error){
+      alert(error.message);
   }
-}
 
-
-
-
+};
