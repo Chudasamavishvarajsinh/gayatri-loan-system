@@ -4,6 +4,30 @@
     <title>Admin Dashboard - Gayatri Electronics</title>
     <style>
         body {
+
+            <h2>Create Loan</h2>
+
+<input type="text" id="userId" placeholder="User ID">
+<input type="number" id="principal" placeholder="Loan Amount">
+<input type="number" id="interest" placeholder="Interest %">
+<input type="number" id="months" placeholder="EMI Months">
+
+<button onclick="createLoan()">Create Loan</button>
+
+<hr>
+
+<h2>Add Ledger Entry</h2>
+
+<input type="text" id="loanId" placeholder="Loan ID">
+<select id="type">
+  <option value="debit">Debit (Loan Given)</option>
+  <option value="credit">Credit (Payment Received)</option>
+</select>
+<input type="number" id="amount" placeholder="Amount">
+<input type="text" id="note" placeholder="Note">
+
+<button onclick="addLedger()">Add Entry</button>
+            
             font-family: Arial;
             background: #f2f2f2;
             padding: 40px;
