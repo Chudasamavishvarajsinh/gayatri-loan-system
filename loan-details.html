@@ -1,1 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loan Details</title>
+<style>
+body { font-family:Arial; padding:30px; background:#f2f2f2; }
+.card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ccc; padding:8px; text-align:center; }
+th { background:#eee; }
+button { padding:10px; background:#007bff; color:white; border:none; }
+</style>
+</head>
+<body>
 
+<h1>Loan Details</h1>
+<button onclick="goBack()">Back</button>
+
+<div class="card" id="loanInfo"></div>
+
+<div class="card">
+  <h3>Ledger</h3>
+  <div id="ledgerTable"></div>
+</div>
+
+<script type="module" src="js/loan-details.js"></script>
+
+</body>
+</html>
