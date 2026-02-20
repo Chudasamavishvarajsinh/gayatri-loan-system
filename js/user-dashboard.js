@@ -1,8 +1,8 @@
 import { auth, db } from "./firebase-config.js";
 
 import {
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
@@ -12,12 +12,14 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
 window.logout = async function(){
   await signOut(auth);
   window.location = "index.html";
 };
 
-onAuthStateChanged(auth, async (user) => {
+
+onAuthStateChanged(auth, async (user)=>{
 
   if(!user){
     window.location = "index.html";
@@ -29,16 +31,21 @@ onAuthStateChanged(auth, async (user) => {
 
   let html = "";
 
-  snap.forEach(doc=>{
-    const data = doc.data();
+  snap.forEach(docSnap=>{
+
+    const d = docSnap.data();
+
     html += `
-      <p><strong>Principal:</strong> ${data.principal}</p>
-      <p><strong>Total:</strong> ${data.totalAmount}</p>
-      <p><strong>EMI:</strong> ${data.emiAmount}</p>
-      <p><strong>Remaining:</strong> ${data.remainingAmount}</p>
-      <hr>
+      <div style="border:1px solid #ccc;padding:10px;margin-bottom:10px;">
+        <p><strong>Principal:</strong> ${d.principal}</p>
+        <p><strong>Interest Rate:</strong> ${d.interestRate}%</p>
+        <p><strong>Total Without Interest:</strong> ${d.totalWithoutInterest}</p>
+        <p><strong>Total With Interest:</strong> ${d.totalWithInterest}</p>
+        <p><strong>Remaining:</strong> ${d.remainingAmount}</p>
+        <p><strong>Status:</strong> ${d.status}</p>
+      </div>
     `;
   });
 
-  document.getElementById("loanDetails").innerHTML = html;
+  document.getElementById("loans").innerHTML = html;
 });
