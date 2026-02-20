@@ -1,4 +1,5 @@
-import { auth, db } from "./firebase-config.js";
+import { auth } from "./firebase-config.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 window.createAdmin = async function(){
 
@@ -33,6 +34,7 @@ window.adminLogin = async function(){
     await signOut(auth);
   }
 }
+
 
 
 
