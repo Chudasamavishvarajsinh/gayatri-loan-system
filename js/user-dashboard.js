@@ -12,40 +12,79 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-window.logout = async function(){
+window.logout = async function () {
   await signOut(auth);
   window.location = "index.html";
 };
 
+onAuthStateChanged(auth, async (user) => {
 
-onAuthStateChanged(auth, async (user)=>{
-
-  if(!user){
+  if (!user) {
     window.location = "index.html";
     return;
   }
 
-  const q = query(collection(db,"loans"), where("userId","==",user.uid));
-  const snap = await getDocs(q);
+  try {
 
-  let html = "";
+    const q = query(
+      collection(db, "loans"),
+      where("userId", "==", user.uid)
+    );
 
-  snap.forEach(docSnap=>{
+    const snap = await getDocs(q);
 
-    const d = docSnap.data();
+    const loansContainer = document.getElementById("loans");
 
-    html += `
-      <div style="border:1px solid #ccc;padding:10px;margin-bottom:10px;">
-        <p><strong>Principal:</strong> ${d.principal}</p>
-        <p><strong>Interest Rate:</strong> ${d.interestRate}%</p>
-        <p><strong>Total Without Interest:</strong> ${d.totalWithoutInterest}</p>
-        <p><strong>Total With Interest:</strong> ${d.totalWithInterest}</p>
-        <p><strong>Remaining:</strong> ${d.remainingAmount}</p>
-        <p><strong>Status:</strong> ${d.status}</p>
-      </div>
+    if (snap.empty) {
+      loansContainer.innerHTML = "<p>No loans found.</p>";
+      return;
+    }
+
+    let html = `
+      <table border="1" width="100%" cellpadding="8">
+        <tr>
+          <th>Loan ID</th>
+          <th>Principal</th>
+          <th>Total With Interest</th>
+          <th>Remaining</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
     `;
-  });
 
-  document.getElementById("loans").innerHTML = html;
+    snap.forEach((docSnap) => {
+
+      const d = docSnap.data();
+      const loanId = docSnap.id;
+
+      html += `
+        <tr>
+          <td>${loanId}</td>
+          <td>₹ ${d.principal}</td>
+          <td>₹ ${d.totalWithInterest}</td>
+          <td>₹ ${d.remainingAmount}</td>
+          <td>${d.status}</td>
+          <td>
+            <button onclick="viewLoan('${loanId}')">
+              View
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `</table>`;
+
+    loansContainer.innerHTML = html;
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById("loans").innerHTML =
+      "<p>Error loading loans.</p>";
+  }
+
 });
+
+window.viewLoan = function (loanId) {
+  window.location = `loan-details.html?loanId=${loanId}`;
+};
