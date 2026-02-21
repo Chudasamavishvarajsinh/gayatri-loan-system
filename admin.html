@@ -3,21 +3,124 @@
 <head>
     <title>Admin Dashboard - Gayatri Electronics</title>
     <style>
-        body { font-family: Arial; background:#f4f6f9; padding:30px; }
-        .card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; }
-        input, select, button { padding:8px; margin:5px 0; width:100%; }
-        button { background:#007bff; color:white; border:none; cursor:pointer; }
-        button.logout { background:red; }
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f4f6f9;
+        padding: 30px;
+        margin: 0;
+    }
 
-        table { width:100%; border-collapse: collapse; margin-top:10px; }
-        th, td { padding:10px; border:1px solid #ddd; text-align:left; }
-        th { background:#f0f0f0; }
+    h1 {
+        margin-bottom: 10px;
+    }
 
-        .status-active { color:orange; font-weight:bold; }
-        .status-closed { color:green; font-weight:bold; }
+    .card {
+        background: white;
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
 
-        .user-info { margin-top:10px; padding:10px; background:#f9f9f9; border-radius:6px; }
-    </style>
+    input, select {
+        padding: 10px;
+        margin: 6px 0;
+        width: 100%;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.2s ease;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+
+    button.logout {
+        background: #dc3545;
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    button:not(.logout) {
+        background: #007bff;
+        color: white;
+        width: auto;
+        padding: 8px 14px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background: #f9fafc;
+        font-weight: 600;
+    }
+
+    tr:hover {
+        background: #f7f9fc;
+    }
+
+    .status-active {
+        background: #fff3cd;
+        color: #856404;
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-closed {
+        background: #d4edda;
+        color: #155724;
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .user-info {
+        margin-top: 15px;
+        padding: 12px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    .payment-box {
+        max-height: 120px;
+        overflow-y: auto;
+        font-size: 12px;
+    }
+
+    .payment-box hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 5px 0;
+    }
+</style>
 </head>
 <body>
 
@@ -86,4 +189,5 @@
 
 </body>
 </html>
+
 
