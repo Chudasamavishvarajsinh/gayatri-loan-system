@@ -15,6 +15,7 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
 /* 🔒 Protect Admin Dashboard */
 onAuthStateChanged(auth, async (user) => {
 
@@ -33,21 +34,29 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Load Users into Dropdown
-const usersSnap = await getDocs(collection(db, "users"));
-const userSelect = document.getElementById("userId");
+  // ✅ Load Users into Dropdown
+  const usersSnap = await getDocs(collection(db, "users"));
+  const userSelect = document.getElementById("userId");
 
-usersSnap.forEach((docSnap) => {
-  const data = docSnap.data();
-  const option = document.createElement("option");
-  option.value = docSnap.id; // UID
-  option.textContent = `${data.name} (${data.phone})`;
-  userSelect.appendChild(option);
+  userSelect.innerHTML = '<option value="">Select User</option>';
+
+  usersSnap.forEach((docSnap) => {
+    const data = docSnap.data();
+
+    const name = data.name ? data.name : data.email;
+    const phone = data.phone ? data.phone : "No Phone";
+
+    const option = document.createElement("option");
+    option.value = docSnap.id; // UID
+    option.textContent = `${name} (${phone})`;
+
+    userSelect.appendChild(option);
+  });
+
 });
 
-});
 
-
+/* 🔹 Logout */
 window.logout = async function(){
   await signOut(auth);
   window.location = "admin-login.html";
@@ -83,6 +92,11 @@ window.createLoan = async function(){
   });
 
   alert("Loan Created Successfully");
+
+  // Optional: Clear Fields
+  document.getElementById("principal").value = "";
+  document.getElementById("interest").value = "";
+  document.getElementById("months").value = "";
 };
 
 
@@ -133,6 +147,8 @@ window.addLedger = async function(){
 
       alert("Payment Recorded");
   }
+
+  // Optional: Clear Fields
+  document.getElementById("loanId").value = "";
+  document.getElementById("amount").value = "";
 };
-
-
