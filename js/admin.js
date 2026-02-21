@@ -18,6 +18,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
+let allUsersMap = {}; // Store userId -> userName mapping
+
+
 /* 🔒 Protect Admin Dashboard */
 onAuthStateChanged(auth, async (user) => {
 
@@ -36,20 +39,32 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Load Users
+  // Load users for both dropdowns
   const usersSnap = await getDocs(collection(db, "users"));
-  const userSelect = document.getElementById("userId");
 
-  userSelect.innerHTML = '<option value="">Select User</option>';
+  const createLoanSelect = document.getElementById("userId");
+  const historySelect = document.getElementById("historyUserSelect");
+
+  createLoanSelect.innerHTML = '<option value="">Select User</option>';
+  historySelect.innerHTML = '<option value="">Select User</option>';
 
   usersSnap.forEach((docSnap) => {
+
     const data = docSnap.data();
     if (!data.name || !data.phone) return;
 
-    const option = document.createElement("option");
-    option.value = docSnap.id;
-    option.textContent = data.name + " (" + data.phone + ")";
-    userSelect.appendChild(option);
+    const userName = data.name + " (" + data.phone + ")";
+    allUsersMap[docSnap.id] = data.name;
+
+    const option1 = document.createElement("option");
+    option1.value = docSnap.id;
+    option1.textContent = userName;
+    createLoanSelect.appendChild(option1);
+
+    const option2 = document.createElement("option");
+    option2.value = docSnap.id;
+    option2.textContent = userName;
+    historySelect.appendChild(option2);
   });
 
 });
@@ -91,77 +106,83 @@ window.createLoan = async function(){
   });
 
   alert("Loan Created Successfully");
-  loadUserLoans(userId);
 };
 
 
-/* 🔹 When User Changes, Load Their Loans */
-document.getElementById("userId").addEventListener("change", function(){
+/* 🔹 Load Selected User Loan History */
+document.getElementById("historyUserSelect").addEventListener("change", function(){
   const userId = this.value;
   if(userId){
-    loadUserLoans(userId);
-  } else {
-    document.getElementById("userLoans").innerHTML = "Select a user to view loans.";
+    loadUserLoanHistory(userId);
   }
 });
 
 
-/* 🔹 Load Loans for Selected User */
-async function loadUserLoans(userId){
+async function loadUserLoanHistory(userId){
 
-  const loansDiv = document.getElementById("userLoans");
-  loansDiv.innerHTML = "Loading...";
+  const tableBody = document.querySelector("#loanHistoryTable tbody");
+  tableBody.innerHTML = "Loading...";
 
   const q = query(collection(db,"loans"), where("userId","==",userId));
   const snap = await getDocs(q);
 
   if(snap.empty){
-    loansDiv.innerHTML = "No loans found for this user.";
+    tableBody.innerHTML = `<tr><td colspan="8">No loans found.</td></tr>`;
     return;
   }
 
-  let html = `
-    <table border="1" width="100%" cellpadding="8">
-      <tr>
-        <th>Loan ID</th>
-        <th>Principal</th>
-        <th>Remaining</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-  `;
+  let html = "";
 
   snap.forEach(docSnap => {
 
     const d = docSnap.data();
     const loanId = docSnap.id;
+    const userName = allUsersMap[d.userId] || "Unknown";
+
+    const startDate = d.startDate?.toDate 
+        ? d.startDate.toDate().toLocaleDateString()
+        : "-";
+
+    const closedDate = d.closedDate?.toDate
+        ? d.closedDate.toDate().toLocaleDateString()
+        : "-";
 
     html += `
       <tr>
         <td>${loanId}</td>
+        <td>${userName}</td>
         <td>₹ ${d.principal}</td>
+        <td>₹ ${d.totalWithInterest}</td>
         <td>₹ ${d.remainingAmount}</td>
-        <td>${d.status}</td>
-        <td>
-          <button onclick="addPaymentPrompt('${loanId}')">
-            Add Payment
-          </button>
-        </td>
+        <td class="status-${d.status}">${d.status}</td>
+        <td>${startDate}</td>
+        <td>${closedDate}</td>
       </tr>
     `;
   });
 
-  html += `</table>`;
-
-  loansDiv.innerHTML = html;
+  tableBody.innerHTML = html;
 }
 
 
-/* 🔹 Add Payment Without Manual Loan ID */
+/* 🔍 Search Filter */
+document.getElementById("loanSearchInput").addEventListener("keyup", function(){
+
+  const filter = this.value.toLowerCase();
+  const rows = document.querySelectorAll("#loanHistoryTable tbody tr");
+
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(filter) ? "" : "none";
+  });
+
+});
+
+
+/* 🔹 Add Payment (Unchanged Logic) */
 window.addPaymentPrompt = async function(loanId){
 
   const amount = prompt("Enter Payment Amount:");
-
   if(!amount) return;
 
   const paymentAmount = parseFloat(amount);
@@ -207,5 +228,5 @@ window.addPaymentPrompt = async function(loanId){
       alert("Payment Recorded");
   }
 
-  loadUserLoans(loanSnap.data().userId);
+  loadUserLoanHistory(loanSnap.data().userId);
 };
