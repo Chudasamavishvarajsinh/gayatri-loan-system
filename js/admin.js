@@ -18,10 +18,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-let allUsersMap = {}; // Store userId -> userName mapping
+let usersData = {};
 
 
-/* 🔒 Protect Admin Dashboard */
+/* 🔒 Protect Admin */
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -39,32 +39,32 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Load users for both dropdowns
   const usersSnap = await getDocs(collection(db, "users"));
 
   const createLoanSelect = document.getElementById("userId");
   const historySelect = document.getElementById("historyUserSelect");
+  const ledgerUserSelect = document.getElementById("ledgerUserSelect");
 
   createLoanSelect.innerHTML = '<option value="">Select User</option>';
   historySelect.innerHTML = '<option value="">Select User</option>';
+  ledgerUserSelect.innerHTML = '<option value="">Select User</option>';
 
   usersSnap.forEach((docSnap) => {
 
     const data = docSnap.data();
-    if (!data.name || !data.phone) return;
+    if (!data.name) return;
 
-    const userName = data.name + " (" + data.phone + ")";
-    allUsersMap[docSnap.id] = data.name;
+    usersData[docSnap.id] = data;
 
-    const option1 = document.createElement("option");
-    option1.value = docSnap.id;
-    option1.textContent = userName;
-    createLoanSelect.appendChild(option1);
+    const display = `${data.name} (${data.phone})`;
 
-    const option2 = document.createElement("option");
-    option2.value = docSnap.id;
-    option2.textContent = userName;
-    historySelect.appendChild(option2);
+    [createLoanSelect, historySelect, ledgerUserSelect].forEach(select => {
+      const option = document.createElement("option");
+      option.value = docSnap.id;
+      option.textContent = display;
+      select.appendChild(option);
+    });
+
   });
 
 });
@@ -109,85 +109,38 @@ window.createLoan = async function(){
 };
 
 
-/* 🔹 Load Selected User Loan History */
-document.getElementById("historyUserSelect").addEventListener("change", function(){
+/* 🔹 Load Loans for Ledger Dropdown */
+document.getElementById("ledgerUserSelect").addEventListener("change", async function(){
+
   const userId = this.value;
-  if(userId){
-    loadUserLoanHistory(userId);
-  }
-});
+  const loanSelect = document.getElementById("ledgerLoanSelect");
 
+  loanSelect.innerHTML = '<option value="">Select Loan</option>';
 
-async function loadUserLoanHistory(userId){
-
-  const tableBody = document.querySelector("#loanHistoryTable tbody");
-  tableBody.innerHTML = "Loading...";
+  if(!userId) return;
 
   const q = query(collection(db,"loans"), where("userId","==",userId));
   const snap = await getDocs(q);
 
-  if(snap.empty){
-    tableBody.innerHTML = `<tr><td colspan="8">No loans found.</td></tr>`;
-    return;
-  }
-
-  let html = "";
-
   snap.forEach(docSnap => {
-
-    const d = docSnap.data();
-    const loanId = docSnap.id;
-    const userName = allUsersMap[d.userId] || "Unknown";
-
-    const startDate = d.startDate?.toDate 
-        ? d.startDate.toDate().toLocaleDateString()
-        : "-";
-
-    const closedDate = d.closedDate?.toDate
-        ? d.closedDate.toDate().toLocaleDateString()
-        : "-";
-
-    html += `
-      <tr>
-        <td>${loanId}</td>
-        <td>${userName}</td>
-        <td>₹ ${d.principal}</td>
-        <td>₹ ${d.totalWithInterest}</td>
-        <td>₹ ${d.remainingAmount}</td>
-        <td class="status-${d.status}">${d.status}</td>
-        <td>${startDate}</td>
-        <td>${closedDate}</td>
-      </tr>
-    `;
-  });
-
-  tableBody.innerHTML = html;
-}
-
-
-/* 🔍 Search Filter */
-document.getElementById("loanSearchInput").addEventListener("keyup", function(){
-
-  const filter = this.value.toLowerCase();
-  const rows = document.querySelectorAll("#loanHistoryTable tbody tr");
-
-  rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
+    const option = document.createElement("option");
+    option.value = docSnap.id;
+    option.textContent = docSnap.id;
+    loanSelect.appendChild(option);
   });
 
 });
 
 
-/* 🔹 Add Payment (Unchanged Logic) */
-window.addPaymentPrompt = async function(loanId){
+/* 🔹 Add Ledger Entry */
+window.addLedger = async function(){
 
-  const amount = prompt("Enter Payment Amount:");
-  if(!amount) return;
+  const loanId = document.getElementById("ledgerLoanSelect").value;
+  const type = document.getElementById("type").value;
+  const amount = parseFloat(document.getElementById("amount").value);
 
-  const paymentAmount = parseFloat(amount);
-  if(isNaN(paymentAmount)){
-    alert("Invalid amount");
+  if(!loanId || !amount){
+    alert("Fill all fields");
     return;
   }
 
@@ -200,33 +153,106 @@ window.addPaymentPrompt = async function(loanId){
   }
 
   let remaining = loanSnap.data().remainingAmount;
-  remaining -= paymentAmount;
+
+  if(type === "credit"){
+    remaining -= amount;
+  } else {
+    remaining += amount;
+  }
 
   await addDoc(collection(db,"ledger"),{
       loanId,
       userId: loanSnap.data().userId,
-      type: "credit",
-      amount: paymentAmount,
+      type,
+      amount,
       date: new Date().toISOString()
   });
 
   if(remaining <= 0){
-      remaining = 0;
-
-      await updateDoc(loanRef,{
-        remainingAmount: 0,
-        status: "closed",
-        closedDate: serverTimestamp()
-      });
-
-      alert("Loan Fully Paid");
+    await updateDoc(loanRef,{
+      remainingAmount: 0,
+      status: "closed",
+      closedDate: serverTimestamp()
+    });
   } else {
-      await updateDoc(loanRef,{
-        remainingAmount: remaining
-      });
-
-      alert("Payment Recorded");
+    await updateDoc(loanRef,{
+      remainingAmount: remaining
+    });
   }
 
-  loadUserLoanHistory(loanSnap.data().userId);
+  alert("Ledger Updated");
 };
+
+
+/* 🔹 Load Loan History */
+document.getElementById("historyUserSelect").addEventListener("change", async function(){
+
+  const userId = this.value;
+  const userInfoDiv = document.getElementById("selectedUserInfo");
+  const tableBody = document.querySelector("#loanHistoryTable tbody");
+
+  if(!userId){
+    tableBody.innerHTML = `<tr><td colspan="7">Select a user.</td></tr>`;
+    userInfoDiv.innerHTML = "";
+    return;
+  }
+
+  const user = usersData[userId];
+
+  userInfoDiv.innerHTML = `
+    <strong>Name:</strong> ${user.name} <br>
+    <strong>Phone:</strong> ${user.phone} <br>
+    <strong>Address:</strong> ${user.address}
+  `;
+
+  const q = query(collection(db,"loans"), where("userId","==",userId));
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    tableBody.innerHTML = `<tr><td colspan="7">No loans found.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+
+  snap.forEach(docSnap => {
+
+    const d = docSnap.data();
+    const startDate = d.startDate?.toDate ? d.startDate.toDate().toLocaleDateString() : "-";
+    const closedDate = d.closedDate?.toDate ? d.closedDate.toDate().toLocaleDateString() : "-";
+
+    html += `
+      <tr>
+        <td>${docSnap.id}</td>
+        <td>₹ ${d.principal}</td>
+        <td>₹ ${d.totalWithInterest}</td>
+        <td>₹ ${d.remainingAmount}</td>
+        <td class="status-${d.status}">${d.status}</td>
+        <td>${startDate}</td>
+        <td>${closedDate}</td>
+      </tr>
+    `;
+  });
+
+  tableBody.innerHTML = html;
+});
+
+
+/* 🔍 Search (Loan ID + Status Only) */
+document.getElementById("loanSearchInput").addEventListener("keyup", function(){
+
+  const filter = this.value.toLowerCase();
+  const rows = document.querySelectorAll("#loanHistoryTable tbody tr");
+
+  rows.forEach(row => {
+    const loanId = row.cells[0]?.innerText.toLowerCase();
+    const status = row.cells[4]?.innerText.toLowerCase();
+
+    if(loanId?.includes(filter) || status?.includes(filter)){
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+
+});
