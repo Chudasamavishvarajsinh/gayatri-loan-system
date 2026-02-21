@@ -11,6 +11,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
+  where,
   updateDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -34,7 +36,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Load Users Cleanly
+  // Load Users
   const usersSnap = await getDocs(collection(db, "users"));
   const userSelect = document.getElementById("userId");
 
@@ -42,14 +44,12 @@ onAuthStateChanged(auth, async (user) => {
 
   usersSnap.forEach((docSnap) => {
     const data = docSnap.data();
+    if (!data.name || !data.phone) return;
 
-    // Only add users that have name
-    if (data.name) {
-      const option = document.createElement("option");
-      option.value = docSnap.id;
-      option.textContent = data.name + " (" + data.phone + ")";
-      userSelect.appendChild(option);
-    }
+    const option = document.createElement("option");
+    option.value = docSnap.id;
+    option.textContent = data.name + " (" + data.phone + ")";
+    userSelect.appendChild(option);
   });
 
 });
@@ -91,21 +91,82 @@ window.createLoan = async function(){
   });
 
   alert("Loan Created Successfully");
-
-  document.getElementById("principal").value = "";
-  document.getElementById("interest").value = "";
-  document.getElementById("months").value = "";
+  loadUserLoans(userId);
 };
 
 
-/* 🔹 Add Payment */
-window.addLedger = async function(){
+/* 🔹 When User Changes, Load Their Loans */
+document.getElementById("userId").addEventListener("change", function(){
+  const userId = this.value;
+  if(userId){
+    loadUserLoans(userId);
+  } else {
+    document.getElementById("userLoans").innerHTML = "Select a user to view loans.";
+  }
+});
 
-  const loanId = document.getElementById("loanId").value;
-  const amount = parseFloat(document.getElementById("amount").value);
 
-  if(!loanId || !amount){
-    alert("Fill all fields");
+/* 🔹 Load Loans for Selected User */
+async function loadUserLoans(userId){
+
+  const loansDiv = document.getElementById("userLoans");
+  loansDiv.innerHTML = "Loading...";
+
+  const q = query(collection(db,"loans"), where("userId","==",userId));
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    loansDiv.innerHTML = "No loans found for this user.";
+    return;
+  }
+
+  let html = `
+    <table border="1" width="100%" cellpadding="8">
+      <tr>
+        <th>Loan ID</th>
+        <th>Principal</th>
+        <th>Remaining</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+  `;
+
+  snap.forEach(docSnap => {
+
+    const d = docSnap.data();
+    const loanId = docSnap.id;
+
+    html += `
+      <tr>
+        <td>${loanId}</td>
+        <td>₹ ${d.principal}</td>
+        <td>₹ ${d.remainingAmount}</td>
+        <td>${d.status}</td>
+        <td>
+          <button onclick="addPaymentPrompt('${loanId}')">
+            Add Payment
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  loansDiv.innerHTML = html;
+}
+
+
+/* 🔹 Add Payment Without Manual Loan ID */
+window.addPaymentPrompt = async function(loanId){
+
+  const amount = prompt("Enter Payment Amount:");
+
+  if(!amount) return;
+
+  const paymentAmount = parseFloat(amount);
+  if(isNaN(paymentAmount)){
+    alert("Invalid amount");
     return;
   }
 
@@ -113,18 +174,18 @@ window.addLedger = async function(){
   const loanSnap = await getDoc(loanRef);
 
   if(!loanSnap.exists()){
-    alert("Invalid Loan ID");
+    alert("Loan not found");
     return;
   }
 
   let remaining = loanSnap.data().remainingAmount;
-  remaining -= amount;
+  remaining -= paymentAmount;
 
   await addDoc(collection(db,"ledger"),{
       loanId,
       userId: loanSnap.data().userId,
       type: "credit",
-      amount,
+      amount: paymentAmount,
       date: new Date().toISOString()
   });
 
@@ -146,6 +207,5 @@ window.addLedger = async function(){
       alert("Payment Recorded");
   }
 
-  document.getElementById("loanId").value = "";
-  document.getElementById("amount").value = "";
+  loadUserLoans(loanSnap.data().userId);
 };
