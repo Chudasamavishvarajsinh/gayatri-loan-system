@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Register</title>
-<style>
-body{font-family:Arial;background:#2a5298}
-.box{width:350px;background:white;margin:100px auto;padding:30px;border-radius:10px}
-input,button{width:100%;padding:10px;margin:10px 0}
-button{background:#007bff;color:white;border:none}
-</style>
+  <title>User Register</title>
+  <style>
+    body { font-family: Arial; padding: 30px; background: #f2f2f2; }
+    .card { background: white; padding: 20px; width: 350px; border-radius: 8px; }
+    input { width: 100%; padding: 8px; margin-bottom: 10px; }
+    button { padding: 10px; width: 100%; background: #007bff; color: white; border: none; }
+  </style>
 </head>
 <body>
 
-<div class="box">
-<h3>Register</h3>
-<input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-<button onclick="register()">Register</button>
-<p id="msg"></p>
-</div>
+  <div class="card">
+    <h2>User Register</h2>
 
-<script type="module" src="js/user-auth.js"></script>
+    <input type="text" id="name" placeholder="Full Name">
+    <input type="text" id="phone" placeholder="Phone Number">
+    <input type="text" id="address" placeholder="Address">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="register()">Register</button>
+  </div>
+
+  <script type="module" src="js/user-auth.js"></script>
+
 </body>
 </html>
