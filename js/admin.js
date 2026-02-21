@@ -160,12 +160,13 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
         const paymentData = paymentDoc.data();
         const paymentDate = new Date(paymentData.date).toLocaleString();
 
-        paymentHtml += `
-          <div style="font-size:12px; margin-bottom:5px;">
-            ₹ ${paymentData.amount} <br>
-            <small>${paymentDate}</small>
-            <hr>
-          </div>
+       paymentHtml += `
+  <div>
+    ₹ ${paymentData.amount} <br>
+    <small>${paymentDate}</small>
+    <hr>
+  </div>
+`;
         `;
     });
 
@@ -271,3 +272,4 @@ document.getElementById("loanSearchInput").addEventListener("keyup", function(){
   });
 
 });
+
