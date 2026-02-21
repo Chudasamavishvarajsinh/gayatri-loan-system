@@ -36,27 +36,6 @@
 <button onclick="createLoan()">Create Loan</button>
 </div>
 
-<!-- ADD LEDGER -->
-<div class="card">
-<h2>Add Ledger Entry</h2>
-
-<select id="ledgerUserSelect">
-  <option value="">Select User</option>
-</select>
-
-<select id="ledgerLoanSelect">
-  <option value="">Select Loan</option>
-</select>
-
-<select id="type">
-<option value="credit">Credit (Payment Received)</option>
-<option value="debit">Debit (Extra Loan)</option>
-</select>
-
-<input type="number" id="amount" placeholder="Amount">
-<button onclick="addLedger()">Add Entry</button>
-</div>
-
 <!-- USER LOAN HISTORY -->
 <div class="card">
 <h2>User Loan History</h2>
@@ -83,11 +62,12 @@
             <th>Status</th>
             <th>Start Date</th>
             <th>Closed Date</th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td colspan="7">Select a user to view loan history.</td>
+            <td colspan="8">Select a user to view loan history.</td>
         </tr>
     </tbody>
 </table>
