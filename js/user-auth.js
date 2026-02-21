@@ -15,10 +15,13 @@ import {
 /* 🔹 Register */
 window.register = async function(){
 
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const address = document.getElementById("address").value;
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  if(!email || !password){
+  if(!name || !phone || !address || !email || !password){
     alert("Fill all fields");
     return;
   }
@@ -26,12 +29,13 @@ window.register = async function(){
   try{
 
     const userCredential = await createUserWithEmailAndPassword(auth,email,password);
-
     const user = userCredential.user;
 
-    // Create Firestore user document
     await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
+      name: name,
+      phone: phone,
+      address: address,
+      email: email,
       role: "user",
       createdAt: new Date().toISOString()
     });
