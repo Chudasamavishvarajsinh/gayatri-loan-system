@@ -1,6 +1,11 @@
 import { auth, db } from "./firebase-config.js";
 
 import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
   collection,
   addDoc,
   doc,
@@ -9,7 +14,26 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* 🔒 Protect Admin Dashboard */
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location = "admin-login.html";
+    return;
+  }
+
+  const adminRef = doc(db, "admins", user.uid);
+  const adminSnap = await getDoc(adminRef);
+
+  if (!adminSnap.exists()) {
+    alert("Access Denied");
+    await signOut(auth);
+    window.location = "admin-login.html";
+    return;
+  }
+
+});
 
 
 window.logout = async function(){
@@ -25,6 +49,11 @@ window.createLoan = async function(){
   const principal = parseFloat(document.getElementById("principal").value);
   const rate = parseFloat(document.getElementById("interest").value);
   const months = parseInt(document.getElementById("months").value);
+
+  if(!userId || !principal || !rate || !months){
+    alert("Fill all fields");
+    return;
+  }
 
   const interestAmount = (principal * rate * months) / 100;
   const totalWithInterest = principal + interestAmount;
@@ -45,11 +74,16 @@ window.createLoan = async function(){
 };
 
 
-/* 🔹 Add Payment (Khata Style Credit) */
+/* 🔹 Add Payment */
 window.addLedger = async function(){
 
   const loanId = document.getElementById("loanId").value;
   const amount = parseFloat(document.getElementById("amount").value);
+
+  if(!loanId || !amount){
+    alert("Fill all fields");
+    return;
+  }
 
   const loanRef = doc(db,"loans",loanId);
   const loanSnap = await getDoc(loanRef);
@@ -67,7 +101,7 @@ window.addLedger = async function(){
       userId: loanSnap.data().userId,
       type: "credit",
       amount,
-      date: serverTimestamp()
+      date: new Date().toISOString()
   });
 
   if(remaining <= 0){
