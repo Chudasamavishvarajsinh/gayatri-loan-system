@@ -15,6 +15,8 @@
 
         .status-active { color:orange; font-weight:bold; }
         .status-closed { color:green; font-weight:bold; }
+
+        .user-info { margin-top:10px; padding:10px; background:#f9f9f9; border-radius:6px; }
     </style>
 </head>
 <body>
@@ -22,6 +24,7 @@
 <h1>Admin Dashboard</h1>
 <button class="logout" onclick="logout()">Logout</button>
 
+<!-- CREATE LOAN -->
 <div class="card">
 <h2>Create Loan</h2>
 <select id="userId">
@@ -33,18 +36,28 @@
 <button onclick="createLoan()">Create Loan</button>
 </div>
 
+<!-- ADD LEDGER -->
 <div class="card">
 <h2>Add Ledger Entry</h2>
-<input type="text" id="loanId" placeholder="Loan ID">
+
+<select id="ledgerUserSelect">
+  <option value="">Select User</option>
+</select>
+
+<select id="ledgerLoanSelect">
+  <option value="">Select Loan</option>
+</select>
+
 <select id="type">
 <option value="credit">Credit (Payment Received)</option>
 <option value="debit">Debit (Extra Loan)</option>
 </select>
+
 <input type="number" id="amount" placeholder="Amount">
 <button onclick="addLedger()">Add Entry</button>
 </div>
 
-<!-- ✅ NEW PROFESSIONAL USER LOAN HISTORY SECTION -->
+<!-- USER LOAN HISTORY -->
 <div class="card">
 <h2>User Loan History</h2>
 
@@ -52,19 +65,20 @@
   <option value="">Select User</option>
 </select>
 
+<div id="selectedUserInfo" class="user-info"></div>
+
 <input 
   type="text" 
   id="loanSearchInput" 
-  placeholder="Search by Loan ID, User Name, or Status..."
+  placeholder="Search by Loan ID or Status..."
 >
 
 <table id="loanHistoryTable">
     <thead>
         <tr>
             <th>Loan ID</th>
-            <th>User Name</th>
             <th>Principal</th>
-            <th>Total With Interest</th>
+            <th>Total</th>
             <th>Remaining</th>
             <th>Status</th>
             <th>Start Date</th>
@@ -73,7 +87,7 @@
     </thead>
     <tbody>
         <tr>
-            <td colspan="8">Select a user to view loan history.</td>
+            <td colspan="7">Select a user to view loan history.</td>
         </tr>
     </tbody>
 </table>
