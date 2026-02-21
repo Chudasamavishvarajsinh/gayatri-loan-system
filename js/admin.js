@@ -33,6 +33,18 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  // Load Users into Dropdown
+const usersSnap = await getDocs(collection(db, "users"));
+const userSelect = document.getElementById("userId");
+
+usersSnap.forEach((docSnap) => {
+  const data = docSnap.data();
+  const option = document.createElement("option");
+  option.value = docSnap.id; // UID
+  option.textContent = `${data.name} (${data.phone})`;
+  userSelect.appendChild(option);
+});
+
 });
 
 
@@ -122,3 +134,4 @@ window.addLedger = async function(){
       alert("Payment Recorded");
   }
 };
+
