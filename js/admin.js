@@ -39,7 +39,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Load all users
+  // Load users
   const usersSnap = await getDocs(collection(db, "users"));
 
   const createLoanSelect = document.getElementById("userId");
@@ -57,7 +57,8 @@ onAuthStateChanged(auth, async (user) => {
 
     usersData[docSnap.id] = data;
 
-    const displayText = `${data.name} (${data.phone})`;
+    // ✅ Only name in dropdown (NO phone number)
+    const displayText = `${data.name}`;
 
     [createLoanSelect, historySelect, ledgerUserSelect].forEach(select => {
       const option = document.createElement("option");
@@ -200,7 +201,7 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
 
   const user = usersData[userId];
 
-  // Show user info (including phone)
+  // ✅ Phone still visible here
   userInfoDiv.innerHTML = `
     <strong>Name:</strong> ${user.name} <br>
     <strong>Phone:</strong> ${user.phone} <br>
@@ -240,7 +241,7 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
 });
 
 
-/* 🔍 Search ONLY by Loan ID and Status */
+/* 🔍 Search ONLY by Loan ID + Status */
 document.getElementById("loanSearchInput").addEventListener("keyup", function(){
 
   const filter = this.value.trim().toLowerCase();
