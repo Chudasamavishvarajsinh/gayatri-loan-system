@@ -67,14 +67,14 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 
-/* Logout */
+/* 🔹 Logout */
 window.logout = async function(){
   await signOut(auth);
   window.location = "admin-login.html";
 };
 
 
-/* Create Loan */
+/* 🔹 Create Loan */
 window.createLoan = async function(){
 
   const userId = document.getElementById("userId").value;
@@ -106,7 +106,7 @@ window.createLoan = async function(){
 };
 
 
-/* User Loan History */
+/* 🔹 User Loan History */
 document.getElementById("historyUserSelect").addEventListener("change", async function(){
 
   const userId = this.value;
@@ -114,7 +114,7 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
   const tableBody = document.querySelector("#loanHistoryTable tbody");
 
   if(!userId){
-    tableBody.innerHTML = `<tr><td colspan="8">Select a user.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="9">Select a user.</td></tr>`;
     userInfoDiv.innerHTML = "";
     return;
   }
@@ -131,19 +131,47 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
   const snap = await getDocs(q);
 
   if(snap.empty){
-    tableBody.innerHTML = `<tr><td colspan="8">No loans found.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="9">No loans found.</td></tr>`;
     return;
   }
 
   let html = "";
 
-  snap.forEach(docSnap => {
+  for (const docSnap of snap.docs) {
 
     const d = docSnap.data();
     const loanId = docSnap.id;
 
-    const startDate = d.startDate?.toDate ? d.startDate.toDate().toLocaleDateString() : "-";
-    const closedDate = d.closedDate?.toDate ? d.closedDate.toDate().toLocaleDateString() : "-";
+    const startDate = d.startDate?.toDate ? d.startDate.toDate().toLocaleString() : "-";
+    const closedDate = d.closedDate?.toDate ? d.closedDate.toDate().toLocaleString() : "-";
+
+    // 🔹 Fetch partial payments for this loan
+    const ledgerQuery = query(
+        collection(db,"ledger"),
+        where("loanId","==",loanId),
+        where("type","==","credit")
+    );
+
+    const ledgerSnap = await getDocs(ledgerQuery);
+
+    let paymentHtml = "";
+
+    ledgerSnap.forEach(paymentDoc => {
+        const paymentData = paymentDoc.data();
+        const paymentDate = new Date(paymentData.date).toLocaleString();
+
+        paymentHtml += `
+          <div style="font-size:12px; margin-bottom:5px;">
+            ₹ ${paymentData.amount} <br>
+            <small>${paymentDate}</small>
+            <hr>
+          </div>
+        `;
+    });
+
+    if(paymentHtml === ""){
+        paymentHtml = "-";
+    }
 
     let actionBtn = "";
 
@@ -162,16 +190,17 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
         <td class="status-${d.status}">${d.status}</td>
         <td>${startDate}</td>
         <td>${closedDate}</td>
+        <td>${paymentHtml}</td>
         <td>${actionBtn}</td>
       </tr>
     `;
-  });
+  }
 
   tableBody.innerHTML = html;
 });
 
 
-/* Add Payment */
+/* 🔹 Add Payment */
 window.addPayment = async function(loanId){
 
   const amount = prompt("Enter Payment Amount:");
@@ -217,5 +246,28 @@ window.addPayment = async function(loanId){
       alert("Payment Recorded");
   }
 
-  document.getElementById("historyUserSelect").dispatchEvent(new Event("change"));
+  document.getElementById("historyUserSelect")
+    .dispatchEvent(new Event("change"));
 };
+
+
+/* 🔍 Search Only Loan ID + Status */
+document.getElementById("loanSearchInput").addEventListener("keyup", function(){
+
+  const filter = this.value.trim().toLowerCase();
+  const rows = document.querySelectorAll("#loanHistoryTable tbody tr");
+
+  rows.forEach(row => {
+
+    const loanId = row.cells[0] ? row.cells[0].innerText.toLowerCase() : "";
+    const status = row.cells[4] ? row.cells[4].innerText.toLowerCase() : "";
+
+    if (loanId.includes(filter) || status.includes(filter)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+
+  });
+
+});
