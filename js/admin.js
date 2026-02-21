@@ -21,7 +21,7 @@ import {
 let usersData = {};
 
 
-/* 🔒 Protect Admin */
+/* 🔒 Protect Admin Dashboard */
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -39,6 +39,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  // Load all users
   const usersSnap = await getDocs(collection(db, "users"));
 
   const createLoanSelect = document.getElementById("userId");
@@ -56,12 +57,12 @@ onAuthStateChanged(auth, async (user) => {
 
     usersData[docSnap.id] = data;
 
-    const display = `${data.name} (${data.phone})`;
+    const displayText = `${data.name} (${data.phone})`;
 
     [createLoanSelect, historySelect, ledgerUserSelect].forEach(select => {
       const option = document.createElement("option");
       option.value = docSnap.id;
-      option.textContent = display;
+      option.textContent = displayText;
       select.appendChild(option);
     });
 
@@ -184,7 +185,7 @@ window.addLedger = async function(){
 };
 
 
-/* 🔹 Load Loan History */
+/* 🔹 User Loan History */
 document.getElementById("historyUserSelect").addEventListener("change", async function(){
 
   const userId = this.value;
@@ -199,6 +200,7 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
 
   const user = usersData[userId];
 
+  // Show user info (including phone)
   userInfoDiv.innerHTML = `
     <strong>Name:</strong> ${user.name} <br>
     <strong>Phone:</strong> ${user.phone} <br>
@@ -238,21 +240,23 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
 });
 
 
-/* 🔍 Search (Loan ID + Status Only) */
+/* 🔍 Search ONLY by Loan ID and Status */
 document.getElementById("loanSearchInput").addEventListener("keyup", function(){
 
-  const filter = this.value.toLowerCase();
+  const filter = this.value.trim().toLowerCase();
   const rows = document.querySelectorAll("#loanHistoryTable tbody tr");
 
   rows.forEach(row => {
-    const loanId = row.cells[0]?.innerText.toLowerCase();
-    const status = row.cells[4]?.innerText.toLowerCase();
 
-    if(loanId?.includes(filter) || status?.includes(filter)){
+    const loanId = row.cells[0] ? row.cells[0].innerText.toLowerCase() : "";
+    const status = row.cells[4] ? row.cells[4].innerText.toLowerCase() : "";
+
+    if (loanId.includes(filter) || status.includes(filter)) {
       row.style.display = "";
     } else {
       row.style.display = "none";
     }
+
   });
 
 });
