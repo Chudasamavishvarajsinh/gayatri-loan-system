@@ -1,26 +1,29 @@
-console.log("User login JS loaded");
 import { auth } from "./firebase-config.js";
 import { signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-window.login = async function() {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const loginBtn = document.getElementById("loginBtn");
 
-    if (!email || !password) {
-        alert("Please fill all fields");
-        return;
-    }
+    loginBtn.addEventListener("click", async () => {
 
-    try {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-        await signInWithEmailAndPassword(auth, email, password);
+        if (!email || !password) {
+            alert("Please fill all fields");
+            return;
+        }
 
-        window.location = "user-dashboard.html";
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            window.location = "user-dashboard.html";
+        } catch (error) {
+            alert(error.message);
+            console.error(error);
+        }
 
-    } catch (error) {
-        alert(error.message);
-        console.error(error);
-    }
-};
+    });
+
+});
