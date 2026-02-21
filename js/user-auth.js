@@ -1,77 +1,50 @@
-import { auth, db } from "./firebase-config.js";
+import { auth } from "./firebase-config.js";
+import { signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+document.addEventListener("DOMContentLoaded", () => {
 
-import {
-  doc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const loginBtn = document.getElementById("loginBtn");
+    const messageBox = document.getElementById("messageBox");
 
+    loginBtn.addEventListener("click", async () => {
 
-/* 🔹 Register */
-window.register = async function(){
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const address = document.getElementById("address").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+        messageBox.className = "message-box";
+        messageBox.style.display = "none";
 
-  if(!name || !phone || !address || !email || !password){
-    alert("Fill all fields");
-    return;
-  }
+        if (!email || !password) {
+            showError("Please fill all fields");
+            return;
+        }
 
-  try{
+        try {
 
-    const userCredential = await createUserWithEmailAndPassword(auth,email,password);
-    const user = userCredential.user;
+            await signInWithEmailAndPassword(auth, email, password);
 
-    await setDoc(doc(db, "users", user.uid), {
-      name: name,
-      phone: phone,
-      address: address,
-      email: email,
-      role: "user",
-      createdAt: new Date().toISOString()
+            showSuccess("Login successful. Redirecting...");
+
+            setTimeout(() => {
+                window.location = "user-dashboard.html";
+            }, 1000);
+
+        } catch (error) {
+            showError(error.message);
+            console.error(error);
+        }
+
     });
 
-    alert("Registration Successful");
-    window.location="index.html";
+    function showSuccess(message) {
+        messageBox.textContent = message;
+        messageBox.classList.add("message-success");
+    }
 
-  }catch(error){
-    alert(error.message);
-  }
-};
+    function showError(message) {
+        messageBox.textContent = message;
+        messageBox.classList.add("message-error");
+    }
 
-
-/* 🔹 Login */
-window.login = async function(){
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  if(!email || !password){
-    alert("Fill all fields");
-    return;
-  }
-
-  try{
-    await signInWithEmailAndPassword(auth,email,password);
-    alert("Login Successful");
-    window.location="user-dashboard.html";
-  }catch(error){
-    alert(error.message);
-  }
-};
-
-
-/* 🔹 Logout */
-window.logout = async function(){
-  await signOut(auth);
-  window.location="index.html";
-};
+});
