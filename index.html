@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Login - Gayatri Electronics</title>
+    <title>Gayatri Electronics - Loan System</title>
 
     <style>
         body {
             font-family: "Segoe UI", Arial, sans-serif;
-            background: #f4f6f9;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,12 +14,31 @@
             margin: 0;
         }
 
+        .container {
+            text-align: center;
+            color: white;
+        }
+
+        .system-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sub-title {
+            font-size: 14px;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
         .card {
             background: white;
             padding: 30px;
             width: 350px;
             border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            text-align: left;
+            color: black;
         }
 
         h2 {
@@ -51,15 +70,30 @@
             opacity: 0.9;
         }
 
-        .link {
+        .secondary-btn {
+            background: #6c757d;
+        }
+
+        .links {
             text-align: center;
             margin-top: 10px;
             font-size: 14px;
         }
 
-        .link a {
+        .links a {
             text-decoration: none;
             color: #007bff;
+        }
+
+        .admin-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .admin-link a {
+            text-decoration: none;
+            font-size: 13px;
+            color: #555;
         }
 
     </style>
@@ -67,17 +101,28 @@
 
 <body>
 
-<div class="card">
-    <h2>User Login</h2>
+<div class="container">
 
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
+    <div class="system-title">Gayatri Electronics</div>
+    <div class="sub-title">Loan Management System</div>
 
-    <button onclick="login()">Login</button>
+    <div class="card">
+        <h2>User Login</h2>
 
-    <div class="link">
-        Don't have an account? <a href="register.html">Register</a>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <div class="links">
+            Don't have an account? <a href="register.html">Register</a>
+        </div>
+
+        <div class="admin-link">
+            <a href="admin-login.html">Admin Login</a>
+        </div>
     </div>
+
 </div>
 
 <script type="module" src="js/login.js"></script>
