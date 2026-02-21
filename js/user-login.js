@@ -8,21 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loginBtn.addEventListener("click", async () => {
 
+        console.log("Login button clicked");
+
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
 
-        if (!email || !password) {
-            alert("Please fill all fields");
-            return;
-        }
-
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            window.location = "user-dashboard.html";
-        } catch (error) {
-            alert(error.message);
-            console.error(error);
-        }
+        console.log("Email:", email);
+        console.log("Password:", password);
 
     });
 
