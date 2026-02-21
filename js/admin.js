@@ -34,7 +34,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // ✅ Load Users into Dropdown
+  // Load Users Cleanly
   const usersSnap = await getDocs(collection(db, "users"));
   const userSelect = document.getElementById("userId");
 
@@ -43,14 +43,13 @@ onAuthStateChanged(auth, async (user) => {
   usersSnap.forEach((docSnap) => {
     const data = docSnap.data();
 
-    const name = data.name ? data.name : data.email;
-    const phone = data.phone ? data.phone : "No Phone";
-
-    const option = document.createElement("option");
-    option.value = docSnap.id; // UID
-    option.textContent = `${name} (${phone})`;
-
-    userSelect.appendChild(option);
+    // Only add users that have name
+    if (data.name) {
+      const option = document.createElement("option");
+      option.value = docSnap.id;
+      option.textContent = data.name + " (" + data.phone + ")";
+      userSelect.appendChild(option);
+    }
   });
 
 });
@@ -93,7 +92,6 @@ window.createLoan = async function(){
 
   alert("Loan Created Successfully");
 
-  // Optional: Clear Fields
   document.getElementById("principal").value = "";
   document.getElementById("interest").value = "";
   document.getElementById("months").value = "";
@@ -148,7 +146,6 @@ window.addLedger = async function(){
       alert("Payment Recorded");
   }
 
-  // Optional: Clear Fields
   document.getElementById("loanId").value = "";
   document.getElementById("amount").value = "";
 };
