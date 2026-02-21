@@ -8,6 +8,13 @@
         input, select, button { padding:8px; margin:5px 0; width:100%; }
         button { background:#007bff; color:white; border:none; cursor:pointer; }
         button.logout { background:red; }
+
+        table { width:100%; border-collapse: collapse; margin-top:10px; }
+        th, td { padding:10px; border:1px solid #ddd; text-align:left; }
+        th { background:#f0f0f0; }
+
+        .status-active { color:orange; font-weight:bold; }
+        .status-closed { color:green; font-weight:bold; }
     </style>
 </head>
 <body>
@@ -37,11 +44,40 @@
 <button onclick="addLedger()">Add Entry</button>
 </div>
 
+<!-- ✅ NEW PROFESSIONAL USER LOAN HISTORY SECTION -->
 <div class="card">
-<h2>User Loans</h2>
-<div id="userLoans">
-  Select a user to view loans.
-</div>
+<h2>User Loan History</h2>
+
+<select id="historyUserSelect">
+  <option value="">Select User</option>
+</select>
+
+<input 
+  type="text" 
+  id="loanSearchInput" 
+  placeholder="Search by Loan ID, User Name, or Status..."
+>
+
+<table id="loanHistoryTable">
+    <thead>
+        <tr>
+            <th>Loan ID</th>
+            <th>User Name</th>
+            <th>Principal</th>
+            <th>Total With Interest</th>
+            <th>Remaining</th>
+            <th>Status</th>
+            <th>Start Date</th>
+            <th>Closed Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="8">Select a user to view loan history.</td>
+        </tr>
+    </tbody>
+</table>
+
 </div>
 
 <div class="card">
@@ -55,5 +91,3 @@
 
 </body>
 </html>
-
-
