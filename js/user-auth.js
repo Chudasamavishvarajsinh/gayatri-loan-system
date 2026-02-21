@@ -1,10 +1,15 @@
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
 /* 🔹 Register */
@@ -19,9 +24,21 @@ window.register = async function(){
   }
 
   try{
-    await createUserWithEmailAndPassword(auth,email,password);
+
+    const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+
+    const user = userCredential.user;
+
+    // Create Firestore user document
+    await setDoc(doc(db, "users", user.uid), {
+      email: user.email,
+      role: "user",
+      createdAt: new Date().toISOString()
+    });
+
     alert("Registration Successful");
     window.location="index.html";
+
   }catch(error){
     alert(error.message);
   }
