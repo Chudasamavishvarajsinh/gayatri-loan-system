@@ -249,14 +249,23 @@ label {
 <!-- ===== USER LOAN HISTORY ===== -->
 <div class="card">
 <h2>User Loan History</h2>
+<div class="filter-bar">
 
-<select id="historyUserSelect">
-  <option value="">Select User</option>
-</select>
+  <div>
+    <label>Select User</label>
+    <select id="historyUserSelect">
+      <option value="">Select User</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Search Loan</label>
+    <input type="text" id="loanSearchInput" placeholder="Search by Loan ID or Status...">
+  </div>
+
+</div>
 
 <div id="selectedUserInfo" class="user-info"></div>
-
-<input type="text" id="loanSearchInput" placeholder="Search by Loan ID or Status...">
 
 <table id="loanHistoryTable">
     <thead>
@@ -292,5 +301,6 @@ label {
 
 </body>
 </html>
+
 
 
