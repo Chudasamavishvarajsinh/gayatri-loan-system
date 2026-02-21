@@ -1,17 +1,25 @@
 import { auth } from "./firebase-config.js";
-import { signInWithEmailAndPassword }
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-window.loginUser = async function(){
+window.login = async function() {
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
-const msg = document.getElementById("msg");
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-try{
-await signInWithEmailAndPassword(auth,email,password);
-window.location.href="user-dashboard.html";
-}catch(e){
-msg.innerText = e.message;
-}
+    if (!email || !password) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    try {
+
+        await signInWithEmailAndPassword(auth, email, password);
+
+        window.location = "user-dashboard.html";
+
+    } catch (error) {
+        alert(error.message);
+        console.error(error);
+    }
 };
