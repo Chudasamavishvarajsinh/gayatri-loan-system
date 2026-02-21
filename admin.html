@@ -199,13 +199,37 @@
 <!-- ===== CREATE LOAN ===== -->
 <div class="card">
 <h2>Create Loan</h2>
-<select id="userId">
-  <option value="">Select User</option>
-</select>
-<input type="number" id="principal" placeholder="Loan Amount">
-<input type="number" id="interest" placeholder="Interest %">
-<input type="number" id="months" placeholder="EMI Months">
-<button onclick="createLoan()">Create Loan</button>
+
+<div class="form-grid">
+
+  <div>
+    <label>User</label>
+    <select id="userId">
+      <option value="">Select User</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Loan Amount</label>
+    <input type="number" id="principal" placeholder="Enter amount">
+  </div>
+
+  <div>
+    <label>Interest %</label>
+    <input type="number" id="interest" placeholder="Enter interest">
+  </div>
+
+  <div>
+    <label>EMI Months</label>
+    <input type="number" id="months" placeholder="Enter months">
+  </div>
+
+</div>
+
+<div style="margin-top:15px;">
+  <button onclick="createLoan()">Create Loan</button>
+</div>
+
 </div>
 
 <!-- ===== USER LOAN HISTORY ===== -->
@@ -254,3 +278,4 @@
 
 </body>
 </html>
+
