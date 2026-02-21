@@ -29,7 +29,19 @@
         .left-section p {
             font-size: 16px;
             opacity: 0.9;
-            max-width: 400px;
+            max-width: 450px;
+        }
+
+        .business-info {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .business-info p {
+            margin: 6px 0;
+            font-size: 14px;
         }
 
         .right-section {
@@ -59,13 +71,6 @@
             margin-bottom: 12px;
             border-radius: 8px;
             border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #2a5298;
-            box-shadow: 0 0 4px rgba(42,82,152,0.3);
         }
 
         button {
@@ -74,7 +79,6 @@
             border-radius: 8px;
             border: none;
             font-weight: 600;
-            font-size: 14px;
             cursor: pointer;
             margin-top: 5px;
         }
@@ -110,38 +114,10 @@
         }
 
         @media (max-width: 900px) {
-            body {
-                flex-direction: column;
-            }
-
-            .left-section {
-                padding: 30px;
-                text-align: center;
-            }
-
-            .right-section {
-                padding: 30px;
-            }
+            body { flex-direction: column; }
+            .left-section { padding: 30px; text-align: center; }
+            .right-section { padding: 30px; }
         }
-
-
-        .business-info {
-    margin-top: 30px;
-    background: rgba(255,255,255,0.1);
-    padding: 20px;
-    border-radius: 12px;
-    backdrop-filter: blur(5px);
-}
-
-.business-info h3 {
-    margin-top: 0;
-    font-size: 18px;
-}
-
-.business-info p {
-    margin: 6px 0;
-    font-size: 14px;
-}
 
     </style>
 </head>
@@ -149,25 +125,24 @@
 <body>
 
     <div class="left-section">
-    <h1>Gayatri Electronics</h1>
-    <p>
-        Professional Loan Management System designed for secure tracking,
-        transparent accounting, and powerful financial control.
-    </p>
-
-    <div class="business-info">
-        <h3>Business Details</h3>
-        <p><strong>Owner:</strong> Chudasama Baldevsinh Mansang</p>
-        <p><strong>Contact:</strong> 9924232759</p>
+        <h1>Gayatri Electronics</h1>
         <p>
-            <strong>Address:</strong><br>
-            Gayatri Electronics,<br>
-            Besides Chamunda Games Store,<br>
-            Opp. Pir Ni Dargah,<br>
-            Street No. 5, Khodiyar Colony, Jamnagar , Gujarat 361006 
+            Professional Loan Management System designed for secure tracking,
+            transparent accounting, and powerful financial control.
         </p>
+
+        <div class="business-info">
+            <p><strong>Owner:</strong> Chudasama Baldevsinh Mansang</p>
+            <p><strong>Contact:</strong> 9924232759</p>
+            <p>
+                Gayatri Electronics,<br>
+                Besides Chamunda Games Store,<br>
+                Opp. Pir Ni Dargah,<br>
+                Street No. 5, Khodiyar Colony , Jamnagar,<br>
+                Gujarat 361006
+            </p>
+        </div>
     </div>
-</div>
 
     <div class="right-section">
         <div class="card">
@@ -177,6 +152,7 @@
             <input type="password" id="password" placeholder="Password">
 
             <button class="primary-btn" onclick="login()">Login</button>
+
             <button class="secondary-btn" onclick="window.location='register.html'">
                 Create Account
             </button>
@@ -187,10 +163,7 @@
         </div>
     </div>
 
-<script type="module" src="js/login.js"></script>
+<script type="module" src="js/user-login.js"></script>
 
 </body>
 </html>
-
-
-
