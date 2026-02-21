@@ -21,7 +21,10 @@ import {
 let usersData = {};
 
 
-/* 🔒 Protect Admin */
+/* ============================= */
+/* 🔒 ADMIN AUTH PROTECTION */
+/* ============================= */
+
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -29,25 +32,50 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const adminRef = doc(db, "admins", user.uid);
-  const adminSnap = await getDoc(adminRef);
+  try {
 
-  if (!adminSnap.exists()) {
-    alert("Access Denied");
-    await signOut(auth);
-    window.location = "admin-login.html";
-    return;
+    const adminRef = doc(db, "admins", user.uid);
+    const adminSnap = await getDoc(adminRef);
+
+    if (!adminSnap.exists()) {
+      alert("Access Denied");
+      await signOut(auth);
+      window.location = "admin-login.html";
+      return;
+    }
+
+    await loadUsers();
+
+  } catch (error) {
+    console.error("Admin Auth Error:", error);
   }
+
+});
+
+
+/* ============================= */
+/* 🔹 LOAD USERS SAFELY */
+/* ============================= */
+
+async function loadUsers() {
 
   const usersSnap = await getDocs(collection(db, "users"));
 
   const createLoanSelect = document.getElementById("userId");
   const historySelect = document.getElementById("historyUserSelect");
 
+  if (!createLoanSelect || !historySelect) {
+    console.error("Dropdown elements not found in HTML");
+    return;
+  }
+
   createLoanSelect.innerHTML = '<option value="">Select User</option>';
   historySelect.innerHTML = '<option value="">Select User</option>';
 
+  usersData = {};
+
   usersSnap.forEach((docSnap) => {
+
     const data = docSnap.data();
     if (!data.name) return;
 
@@ -64,50 +92,70 @@ onAuthStateChanged(auth, async (user) => {
     historySelect.appendChild(option2);
   });
 
-});
+}
 
 
-/* 🔹 Logout */
+/* ============================= */
+/* 🔹 LOGOUT */
+/* ============================= */
+
 window.logout = async function(){
   await signOut(auth);
   window.location = "admin-login.html";
 };
 
 
-/* 🔹 Create Loan */
+/* ============================= */
+/* 🔹 CREATE LOAN */
+/* ============================= */
+
 window.createLoan = async function(){
 
-  const userId = document.getElementById("userId").value;
-  const principal = parseFloat(document.getElementById("principal").value);
-  const rate = parseFloat(document.getElementById("interest").value);
-  const months = parseInt(document.getElementById("months").value);
+  const userId = document.getElementById("userId")?.value;
+  const principal = parseFloat(document.getElementById("principal")?.value);
+  const rate = parseFloat(document.getElementById("interest")?.value);
+  const months = parseInt(document.getElementById("months")?.value);
 
   if(!userId || !principal || !rate || !months){
     alert("Fill all fields");
     return;
   }
 
-  const interestAmount = (principal * rate * months) / 100;
-  const totalWithInterest = principal + interestAmount;
+  try {
 
-  await addDoc(collection(db,"loans"),{
-      userId,
-      principal,
-      interestRate: rate,
-      months,
-      totalWithoutInterest: principal,
-      totalWithInterest,
-      remainingAmount: totalWithInterest,
-      status: "active",
-      startDate: serverTimestamp()
-  });
+    const interestAmount = (principal * rate * months) / 100;
+    const totalWithInterest = principal + interestAmount;
 
-  alert("Loan Created Successfully");
+    await addDoc(collection(db,"loans"),{
+        userId,
+        principal,
+        interestRate: rate,
+        months,
+        totalWithoutInterest: principal,
+        totalWithInterest,
+        remainingAmount: totalWithInterest,
+        status: "active",
+        startDate: serverTimestamp()
+    });
+
+    alert("Loan Created Successfully");
+
+  } catch(error) {
+    console.error("Create Loan Error:", error);
+  }
+
 };
 
 
-/* 🔹 User Loan History */
-document.getElementById("historyUserSelect").addEventListener("change", async function(){
+/* ============================= */
+/* 🔹 USER LOAN HISTORY */
+/* ============================= */
+
+const historySelect = document.getElementById("historyUserSelect");
+
+if (historySelect) {
+
+historySelect.addEventListener("change", async function(){
 
   const userId = this.value;
   const userInfoDiv = document.getElementById("selectedUserInfo");
@@ -122,9 +170,9 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
   const user = usersData[userId];
 
   userInfoDiv.innerHTML = `
-    <strong>Name:</strong> ${user.name} <br>
-    <strong>Phone:</strong> ${user.phone} <br>
-    <strong>Address:</strong> ${user.address}
+    <strong>Name:</strong> ${user?.name || "-"} <br>
+    <strong>Phone:</strong> ${user?.phone || "-"} <br>
+    <strong>Address:</strong> ${user?.address || "-"}
   `;
 
   const q = query(collection(db,"loans"), where("userId","==",userId));
@@ -145,7 +193,7 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
     const startDate = d.startDate?.toDate ? d.startDate.toDate().toLocaleString() : "-";
     const closedDate = d.closedDate?.toDate ? d.closedDate.toDate().toLocaleString() : "-";
 
-    // 🔹 Fetch partial payments for this loan
+    // Fetch payments
     const ledgerQuery = query(
         collection(db,"ledger"),
         where("loanId","==",loanId),
@@ -160,13 +208,12 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
         const paymentData = paymentDoc.data();
         const paymentDate = new Date(paymentData.date).toLocaleString();
 
-       paymentHtml += `
-  <div>
-    ₹ ${paymentData.amount} <br>
-    <small>${paymentDate}</small>
-    <hr>
-  </div>
-`;
+        paymentHtml += `
+          <div>
+            ₹ ${paymentData.amount} <br>
+            <small>${paymentDate}</small>
+            <hr>
+          </div>
         `;
     });
 
@@ -198,10 +245,15 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
   }
 
   tableBody.innerHTML = html;
+
 });
+}
 
 
-/* 🔹 Add Payment */
+/* ============================= */
+/* 🔹 ADD PAYMENT */
+/* ============================= */
+
 window.addPayment = async function(loanId){
 
   const amount = prompt("Enter Payment Amount:");
@@ -213,47 +265,61 @@ window.addPayment = async function(loanId){
     return;
   }
 
-  const loanRef = doc(db,"loans",loanId);
-  const loanSnap = await getDoc(loanRef);
+  try {
 
-  if(!loanSnap.exists()){
-    alert("Loan not found");
-    return;
+    const loanRef = doc(db,"loans",loanId);
+    const loanSnap = await getDoc(loanRef);
+
+    if(!loanSnap.exists()){
+      alert("Loan not found");
+      return;
+    }
+
+    let remaining = loanSnap.data().remainingAmount;
+    remaining -= paymentAmount;
+
+    await addDoc(collection(db,"ledger"),{
+        loanId,
+        userId: loanSnap.data().userId,
+        type: "credit",
+        amount: paymentAmount,
+        date: new Date().toISOString()
+    });
+
+    if(remaining <= 0){
+        remaining = 0;
+        await updateDoc(loanRef,{
+          remainingAmount: 0,
+          status: "closed",
+          closedDate: serverTimestamp()
+        });
+        alert("Loan Fully Paid");
+    } else {
+        await updateDoc(loanRef,{
+          remainingAmount: remaining
+        });
+        alert("Payment Recorded");
+    }
+
+    document.getElementById("historyUserSelect")
+      ?.dispatchEvent(new Event("change"));
+
+  } catch(error) {
+    console.error("Payment Error:", error);
   }
 
-  let remaining = loanSnap.data().remainingAmount;
-  remaining -= paymentAmount;
-
-  await addDoc(collection(db,"ledger"),{
-      loanId,
-      userId: loanSnap.data().userId,
-      type: "credit",
-      amount: paymentAmount,
-      date: new Date().toISOString()
-  });
-
-  if(remaining <= 0){
-      remaining = 0;
-      await updateDoc(loanRef,{
-        remainingAmount: 0,
-        status: "closed",
-        closedDate: serverTimestamp()
-      });
-      alert("Loan Fully Paid");
-  } else {
-      await updateDoc(loanRef,{
-        remainingAmount: remaining
-      });
-      alert("Payment Recorded");
-  }
-
-  document.getElementById("historyUserSelect")
-    .dispatchEvent(new Event("change"));
 };
 
 
-/* 🔍 Search Only Loan ID + Status */
-document.getElementById("loanSearchInput").addEventListener("keyup", function(){
+/* ============================= */
+/* 🔍 SEARCH */
+/* ============================= */
+
+const searchInput = document.getElementById("loanSearchInput");
+
+if (searchInput) {
+
+searchInput.addEventListener("keyup", function(){
 
   const filter = this.value.trim().toLowerCase();
   const rows = document.querySelectorAll("#loanHistoryTable tbody tr");
@@ -272,5 +338,4 @@ document.getElementById("loanSearchInput").addEventListener("keyup", function(){
   });
 
 });
-
-
+}
