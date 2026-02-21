@@ -1,75 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Login - Gayatri Electronics</title>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: linear-gradient(to right, #141e30, #243b55);
-        }
-
-        .header {
-            background: black;
-            color: white;
-            text-align: center;
-            padding: 15px;
-        }
-
-        .login-box {
-            width: 350px;
-            margin: 100px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 12px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 5px;
-            background: #e63946;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #c1121f;
-        }
-    </style>
+<title>Admin Login</title>
+<style>
+body{
+    font-family:Arial;
+    background:#f4f6f9;
+}
+.box{
+    width:350px;
+    background:white;
+    margin:100px auto;
+    padding:30px;
+    border-radius:8px;
+}
+input,button{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+}
+button{
+    background:#007bff;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+.user-btn{
+    background:#28a745;
+}
+hr{
+    margin:20px 0;
+}
+</style>
 </head>
-
 <body>
 
-<div class="header">
-    <h1>Gayatri Electronics</h1>
-    <p>Chudasama Baldevsinh | 📞 9924232759</p>
-    <p>Beside Chamunda Games Store, Opp. Pir Ni Dargah, Jamnagar</p>
-</div>
+<div class="box">
+<h3>Admin Login</h3>
 
-<div class="login-box">
-    <h2>Admin Login</h2>
+<input type="email" id="email" placeholder="Admin Email">
+<input type="password" id="password" placeholder="Password">
 
-    <input type="email" id="email" placeholder="Admin Email">
-    <input type="password" id="password" placeholder="Password">
+<button onclick="adminLogin()">Login</button>
 
-    <button onclick="adminLogin()">Login</button>
+<hr>
+
+<button class="user-btn" onclick="location.href='index.html'">
+User Login
+</button>
+
+<p id="msg"></p>
 </div>
 
 <script type="module" src="js/admin-auth.js"></script>
-
 </body>
 </html>
