@@ -191,7 +191,7 @@ document.getElementById("historyUserSelect").addEventListener("change", async fu
         <td class="status-${d.status}">${d.status}</td>
         <td>${startDate}</td>
         <td>${closedDate}</td>
-        <td>${paymentHtml}</td>
+        <td><div class="payment-box">${paymentHtml}</div></td>
         <td>${actionBtn}</td>
       </tr>
     `;
@@ -272,4 +272,5 @@ document.getElementById("loanSearchInput").addEventListener("keyup", function(){
   });
 
 });
+
 
