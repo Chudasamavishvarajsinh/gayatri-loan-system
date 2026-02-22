@@ -19,7 +19,6 @@ import {
 
 let usersData = {};
 
-
 /* ========================= */
 /* 🔒 ADMIN AUTH PROTECTION */
 /* ========================= */
@@ -81,6 +80,7 @@ async function loadUsers() {
     option2.textContent = data.name;
     historySelect.appendChild(option2);
   });
+
 }
 
 
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ========================= */
-/* 🔹 ADD PAYMENT (FIXED) */
+/* 🔹 ADD PAYMENT */
 /* ========================= */
 
 window.addPayment = async function(loanId){
@@ -291,4 +291,3 @@ window.addPayment = async function(loanId){
 
   await loadDashboardSummary();
 };
-
