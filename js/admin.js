@@ -1,246 +1,341 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Admin Dashboard - Gayatri Electronics</title>
+import { auth, db } from "./firebase-config.js";
 
-<style>
-body{
-    font-family:Segoe UI,Arial,sans-serif;
-    background:#f4f6fb;
-    padding:30px;
-    margin:0;
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+let usersData = {};
+let currentLoanId = null;
+
+
+/* ========================= */
+/* 🔐 ADMIN AUTH PROTECTION */
+/* ========================= */
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location = "admin-login.html";
+    return;
+  }
+
+  const adminRef = doc(db, "admins", user.uid);
+  const adminSnap = await getDoc(adminRef);
+
+  if (!adminSnap.exists()) {
+    await signOut(auth);
+    window.location = "admin-login.html";
+    return;
+  }
+
+  await loadUsers();
+  setupHistoryListener();
+  await loadDashboardSummary();
+});
+
+
+/* ========================= */
+/* 🔹 LOAD USERS */
+/* ========================= */
+
+async function loadUsers() {
+
+  const snap = await getDocs(collection(db, "users"));
+
+  const createSelect = document.getElementById("userId");
+  const historySelect = document.getElementById("historyUserSelect");
+
+  if (!createSelect || !historySelect) return;
+
+  createSelect.innerHTML = `<option value="">Select User</option>`;
+  historySelect.innerHTML = `<option value="">Select User</option>`;
+
+  usersData = {};
+
+  snap.forEach(docSnap => {
+
+    usersData[docSnap.id] = docSnap.data();
+
+    createSelect.appendChild(
+      new Option(docSnap.data().name, docSnap.id)
+    );
+
+    historySelect.appendChild(
+      new Option(docSnap.data().name, docSnap.id)
+    );
+  });
 }
 
-/* HEADER */
 
-.header{
-    background:#1e293b;
-    color:white;
-    padding:20px;
-    border-radius:12px;
-    margin-bottom:25px;
+/* ========================= */
+/* 📊 DASHBOARD SUMMARY */
+/* ========================= */
+
+async function loadDashboardSummary() {
+
+  const usersSnap = await getDocs(collection(db, "users"));
+  const loansSnap = await getDocs(collection(db, "loans"));
+
+  let active = 0;
+  let closed = 0;
+  let outstanding = 0;
+
+  loansSnap.forEach(docSnap => {
+
+    const loan = docSnap.data();
+
+    if (loan.status === "active") {
+      active++;
+      outstanding += loan.remainingAmount || 0;
+    }
+
+    if (loan.status === "closed") {
+      closed++;
+    }
+  });
+
+  document.getElementById("totalUsers").innerText = usersSnap.size;
+  document.getElementById("totalActiveLoans").innerText = active;
+  document.getElementById("totalClosedLoans").innerText = closed;
+  document.getElementById("totalOutstanding").innerText = "₹ " + outstanding;
 }
 
-.header h1{margin:0;}
-.header p{margin:5px 0;font-size:14px;opacity:0.9;}
 
-.top-bar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+/* ========================= */
+/* 🏦 CREATE LOAN */
+/* ========================= */
+
+window.createLoan = async function () {
+
+  const userId = document.getElementById("userId").value;
+  const principal = parseFloat(document.getElementById("principal").value);
+  const rate = parseFloat(document.getElementById("interest").value);
+  const months = parseInt(document.getElementById("months").value);
+
+  if (!userId || isNaN(principal) || isNaN(rate) || isNaN(months)) {
+    alert("Fill all fields correctly");
+    return;
+  }
+
+  const interestAmount = (principal * rate * months) / 100;
+  const totalWithInterest = principal + interestAmount;
+
+  await addDoc(collection(db, "loans"), {
+    userId,
+    principal,
+    interestRate: rate,
+    months,
+    totalWithoutInterest: principal,
+    totalWithInterest,
+    remainingAmount: totalWithInterest,
+    status: "active",
+    startDate: serverTimestamp()
+  });
+
+  alert("Loan Created Successfully");
+
+  document.getElementById("principal").value = "";
+  document.getElementById("interest").value = "";
+  document.getElementById("months").value = "";
+
+  await loadDashboardSummary();
+};
+
+
+/* ========================= */
+/* 📂 USER LOAN HISTORY */
+/* ========================= */
+
+function setupHistoryListener() {
+  document.getElementById("historyUserSelect")
+    ?.addEventListener("change", handleUserHistory);
 }
 
-.logout{
-    background:#dc2626;
-    color:white;
-    border:none;
-    padding:8px 14px;
-    border-radius:6px;
-    cursor:pointer;
+
+async function handleUserHistory() {
+
+  const userId = this.value;
+  const tbody = document.querySelector("#loanHistoryTable tbody");
+
+  if (!userId) {
+    tbody.innerHTML = `<tr><td colspan="6">Select user</td></tr>`;
+    return;
+  }
+
+  const q = query(collection(db, "loans"), where("userId", "==", userId));
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    tbody.innerHTML = `<tr><td colspan="6">No loans found</td></tr>`;
+    return;
+  }
+
+  let html = "";
+
+  snap.forEach(docSnap => {
+
+    const d = docSnap.data();
+    const loanId = docSnap.id;
+
+    html += `
+      <tr class="${d.status === "closed" ? "loan-closed" : "loan-active"}">
+        <td>${loanId}</td>
+        <td>₹ ${d.principal}</td>
+        <td>₹ ${d.totalWithInterest}</td>
+        <td>₹ ${d.remainingAmount}</td>
+        <td><span class="status ${d.status}">${d.status}</span></td>
+        <td>
+          <button class="btn-add" onclick="openPaymentModal('${loanId}')">Add Payment</button>
+          <button class="btn-ledger" onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">Ledger</button>
+        </td>
+      </tr>
+      <tr id="ledger-${loanId}" class="ledger-row">
+        <td colspan="6"></td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
 }
 
-/* CARD */
 
-.card{
-    background:white;
-    padding:20px;
-    border-radius:14px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.06);
-    margin-bottom:25px;
-}
+/* ========================= */
+/* 💳 PAYMENT MODAL */
+/* ========================= */
 
-input, select{
-    padding:10px;
-    margin:6px 0;
-    width:100%;
-    border-radius:6px;
-    border:1px solid #ccc;
-}
+window.openPaymentModal = function (loanId) {
+  currentLoanId = loanId;
+  document.getElementById("paymentModal").style.display = "flex";
+};
 
-button{
-    padding:8px 14px;
-    border:none;
-    border-radius:6px;
-    font-weight:600;
-    cursor:pointer;
-}
+window.closePaymentModal = function () {
+  document.getElementById("paymentAmountInput").value = "";
+  document.getElementById("paymentModal").style.display = "none";
+};
 
-.btn-primary{background:#2563eb;color:white;}
-.btn-secondary{background:#475569;color:white;}
-.btn-add{background:#2563eb;color:white;}
-.btn-ledger{background:#475569;color:white;margin-left:5px;}
 
-/* TABLE */
+window.submitPayment = async function () {
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:15px;
-}
+  const amount = parseFloat(
+    document.getElementById("paymentAmountInput").value
+  );
 
-th{
-    background:#e2e8f0;
-    padding:12px;
-    text-align:left;
-}
+  if (isNaN(amount) || amount <= 0) {
+    alert("Enter valid amount");
+    return;
+  }
 
-td{
-    padding:12px;
-    border-bottom:1px solid #e5e7eb;
-}
+  const loanRef = doc(db, "loans", currentLoanId);
+  const loanSnap = await getDoc(loanRef);
 
-.loan-closed{background:#ecfdf5;}
-.loan-active{background:#ffffff;}
+  if (!loanSnap.exists()) return;
 
-.status{
-    padding:4px 10px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:600;
-}
+  let remaining = loanSnap.data().remainingAmount - amount;
 
-.active{background:#fef3c7;color:#92400e;}
-.closed{background:#bbf7d0;color:#065f46;}
+  await addDoc(collection(db, "ledger"), {
+    loanId: currentLoanId,
+    userId: loanSnap.data().userId,
+    type: "credit",
+    amount: amount,
+    createdAt: serverTimestamp(),
+    date: new Date().toISOString(),
+    dateString: new Date().toLocaleString()
+  });
 
-/* LEDGER */
+  await updateDoc(loanRef, {
+    remainingAmount: remaining <= 0 ? 0 : remaining,
+    status: remaining <= 0 ? "closed" : "active",
+    closedDate: remaining <= 0 ? serverTimestamp() : null
+  });
 
-.ledger-row{display:none;}
+  closePaymentModal();
 
-.ledger-card{
-    background:#f8fafc;
-    border-radius:10px;
-    padding:15px;
-}
+  document.getElementById("historyUserSelect")
+    ?.dispatchEvent(new Event("change"));
 
-.ledger-header{
-    font-weight:600;
-    margin-bottom:10px;
-}
+  await loadDashboardSummary();
+};
 
-.ledger-body{
-    max-height:220px;
-    overflow-y:auto;
-}
 
-.ledger-item{
-    display:flex;
-    justify-content:space-between;
-    padding:8px 0;
-    border-bottom:1px solid #e5e7eb;
-}
+/* ========================= */
+/* 📒 LEDGER */
+/* ========================= */
 
-/* MODAL */
+window.toggleLedger = async function (loanId, totalAmount) {
 
-.modal-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.5);
-    display:none;
-    justify-content:center;
-    align-items:center;
-}
+  const row = document.getElementById(`ledger-${loanId}`);
+  const isOpen = row.style.display === "table-row";
+  row.style.display = isOpen ? "none" : "table-row";
 
-.modal{
-    background:white;
-    padding:25px;
-    width:360px;
-    border-radius:12px;
-}
+  if (!isOpen) {
 
-.modal-buttons{
-    margin-top:15px;
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-}
-</style>
-</head>
+    const q = query(collection(db, "ledger"), where("loanId", "==", loanId));
+    const snap = await getDocs(q);
 
-<body>
+    if (snap.empty) {
+      row.innerHTML = `<td colspan="6">No payments yet</td>`;
+      return;
+    }
 
-<div class="header">
-    <h1>Gayatri Electronics</h1>
-    <p>Owner: Chudasama Baldevsinh Mansang</p>
-    <p>Phone: 9924232759</p>
-    <p>
-        Beside Chamunda Games Store,<br>
-        Opp. Pir Ni Dargah,<br>
-        Street Number 5,<br>
-        Khodiyar Colony,<br>
-        Jamnagar, Gujarat – 361006
-    </p>
-</div>
+    let entries = [];
+    snap.forEach(docSnap => entries.push(docSnap.data()));
 
-<div class="top-bar">
-    <h2>Admin Dashboard</h2>
-    <button class="logout" onclick="logout()">Logout</button>
-</div>
+    entries.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date) : new Date();
+      const dateB = b.date ? new Date(b.date) : new Date();
+      return dateA - dateB;
+    });
 
-<!-- DASHBOARD SUMMARY -->
+    let balance = totalAmount;
 
-<div class="card">
-<p>Total Users: <strong id="totalUsers">0</strong></p>
-<p>Active Loans: <strong id="totalActiveLoans">0</strong></p>
-<p>Closed Loans: <strong id="totalClosedLoans">0</strong></p>
-<p>Total Outstanding: <strong id="totalOutstanding">₹ 0</strong></p>
-</div>
+    let html = `
+      <div class="ledger-card">
+        <div class="ledger-header">Payment History</div>
+        <div class="ledger-body">
+    `;
 
-<!-- CREATE LOAN SECTION (RESTORED) -->
+    entries.forEach(entry => {
 
-<div class="card">
-<h3>Create Loan</h3>
+      balance -= entry.amount;
 
-<select id="userId">
-<option value="">Select User</option>
-</select>
+      const dateTime =
+        entry.dateString ||
+        (entry.date ? new Date(entry.date).toLocaleString() : "-");
 
-<input type="number" id="principal" placeholder="Loan Amount">
-<input type="number" id="interest" placeholder="Interest %">
-<input type="number" id="months" placeholder="Months">
+      html += `
+        <div class="ledger-item">
+          <div>${dateTime}</div>
+          <div class="credit">₹ ${entry.amount}</div>
+          <div class="balance">₹ ${balance < 0 ? 0 : balance}</div>
+        </div>
+      `;
+    });
 
-<button class="btn-primary" onclick="createLoan()">Create Loan</button>
-</div>
+    html += `</div></div>`;
 
-<!-- USER HISTORY -->
+    row.innerHTML = `<td colspan="6">${html}</td>`;
+  }
+};
 
-<div class="card">
-<h3>User Loan History</h3>
 
-<select id="historyUserSelect">
-<option value="">Select User</option>
-</select>
+/* ========================= */
+/* 🔓 LOGOUT */
+/* ========================= */
 
-<table id="loanHistoryTable">
-<thead>
-<tr>
-<th>Loan ID</th>
-<th>Principal</th>
-<th>Total</th>
-<th>Remaining</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
-<tr><td colspan="6">Select user</td></tr>
-</tbody>
-</table>
-</div>
-
-<!-- PAYMENT MODAL -->
-
-<div class="modal-overlay" id="paymentModal">
-<div class="modal">
-<h3>Add Payment</h3>
-<input type="number" id="paymentAmountInput" placeholder="Enter amount">
-<div class="modal-buttons">
-<button onclick="closePaymentModal()">Cancel</button>
-<button class="btn-add" onclick="submitPayment()">Save Payment</button>
-</div>
-</div>
-</div>
-
-<script type="module" src="js/admin.js"></script>
-</body>
-</html>
+window.logout = async function () {
+  await signOut(auth);
+  window.location = "admin-login.html";
+};
