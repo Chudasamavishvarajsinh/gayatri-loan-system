@@ -19,11 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let usersData = {};
-
-
-/* ========================= */
-/* 🔒 ADMIN AUTH */
-/* ========================= */
+let currentLoanId = null;
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -32,47 +28,25 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const adminRef = doc(db, "admins", user.uid);
-  const adminSnap = await getDoc(adminRef);
-
-  if (!adminSnap.exists()) {
-    await signOut(auth);
-    window.location = "admin-login.html";
-    return;
-  }
-
   await loadUsers();
   setupUserHistoryListener();
-  await loadDashboardSummary();   // ✅ Now function exists
+  await loadDashboardSummary();
 });
 
-
-/* ========================= */
-/* 🔹 LOAD USERS */
-/* ========================= */
 
 async function loadUsers() {
 
   const usersSnap = await getDocs(collection(db, "users"));
   const select = document.getElementById("historyUserSelect");
 
-  if (!select) return;
-
   select.innerHTML = `<option value="">Select User</option>`;
 
-  usersData = {};
-
   usersSnap.forEach(docSnap => {
-    const data = docSnap.data();
-    usersData[docSnap.id] = data;
-    select.appendChild(new Option(data.name, docSnap.id));
+    usersData[docSnap.id] = docSnap.data();
+    select.appendChild(new Option(docSnap.data().name, docSnap.id));
   });
 }
 
-
-/* ========================= */
-/* 📊 DASHBOARD SUMMARY */
-/* ========================= */
 
 async function loadDashboardSummary() {
 
@@ -84,17 +58,12 @@ async function loadDashboardSummary() {
   let outstanding = 0;
 
   loansSnap.forEach(docSnap => {
-
     const loan = docSnap.data();
-
     if (loan.status === "active") {
       active++;
       outstanding += loan.remainingAmount || 0;
     }
-
-    if (loan.status === "closed") {
-      closed++;
-    }
+    if (loan.status === "closed") closed++;
   });
 
   document.getElementById("totalUsers").innerText = usersSnap.size;
@@ -104,13 +73,9 @@ async function loadDashboardSummary() {
 }
 
 
-/* ========================= */
-/* 🔹 USER HISTORY */
-/* ========================= */
-
 function setupUserHistoryListener() {
   document.getElementById("historyUserSelect")
-    ?.addEventListener("change", handleUserHistoryChange);
+    .addEventListener("change", handleUserHistoryChange);
 }
 
 
@@ -118,34 +83,18 @@ async function handleUserHistoryChange() {
 
   const userId = this.value;
   const tableBody = document.querySelector("#loanHistoryTable tbody");
-  const infoDiv = document.getElementById("selectedUserInfo");
 
   if (!userId) {
-    tableBody.innerHTML = `<tr><td colspan="8">Select a user.</td></tr>`;
-    infoDiv.innerHTML = "";
+    tableBody.innerHTML = `<tr><td colspan="6">Select user</td></tr>`;
     return;
   }
-
-  const user = usersData[userId];
-
-  infoDiv.innerHTML = `
-    <strong>${user.name}</strong><br>
-    ${user.phone}<br>
-    ${user.address}
-  `;
 
   const q = query(collection(db, "loans"), where("userId", "==", userId));
   const snap = await getDocs(q);
 
-  if (snap.empty) {
-    tableBody.innerHTML = `<tr><td colspan="8">No loans found.</td></tr>`;
-    return;
-  }
-
   let html = "";
 
   snap.forEach(docSnap => {
-
     const d = docSnap.data();
     const loanId = docSnap.id;
 
@@ -155,16 +104,14 @@ async function handleUserHistoryChange() {
         <td>₹ ${d.principal}</td>
         <td>₹ ${d.totalWithInterest}</td>
         <td>₹ ${d.remainingAmount}</td>
-        <td>${d.status}</td>
-        <td>${d.startDate?.toDate?.().toLocaleDateString() || "-"}</td>
-        <td>${d.closedDate?.toDate?.().toLocaleDateString() || "-"}</td>
+        <td><span class="status-badge ${d.status}">${d.status}</span></td>
         <td>
-          <button onclick="addPayment('${loanId}')">Add Payment</button>
-          <button onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">View Ledger</button>
+          <button class="btn-primary" onclick="openPaymentModal('${loanId}')">Add Payment</button>
+          <button class="btn-secondary" onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">Ledger</button>
         </td>
       </tr>
-      <tr id="ledger-${loanId}" style="display:none;">
-        <td colspan="8"></td>
+      <tr id="ledger-${loanId}" class="ledger-row">
+        <td colspan="6"></td>
       </tr>
     `;
   });
@@ -173,9 +120,57 @@ async function handleUserHistoryChange() {
 }
 
 
-/* ========================= */
-/* 🔹 LEDGER */
-/* ========================= */
+/* PAYMENT MODAL */
+
+window.openPaymentModal = function(loanId){
+  currentLoanId = loanId;
+  document.getElementById("paymentModal").style.display = "flex";
+};
+
+window.closePaymentModal = function(){
+  currentLoanId = null;
+  document.getElementById("paymentAmountInput").value = "";
+  document.getElementById("paymentModal").style.display = "none";
+};
+
+window.submitPayment = async function(){
+
+  const amount = parseFloat(document.getElementById("paymentAmountInput").value);
+
+  if (isNaN(amount) || amount <= 0) {
+    alert("Enter valid amount");
+    return;
+  }
+
+  const loanRef = doc(db, "loans", currentLoanId);
+  const loanSnap = await getDoc(loanRef);
+
+  let remaining = loanSnap.data().remainingAmount - amount;
+
+  await addDoc(collection(db, "ledger"), {
+    loanId: currentLoanId,
+    userId: loanSnap.data().userId,
+    type: "credit",
+    amount: amount,
+    date: new Date().toISOString()
+  });
+
+  await updateDoc(loanRef, {
+    remainingAmount: remaining <= 0 ? 0 : remaining,
+    status: remaining <= 0 ? "closed" : "active",
+    closedDate: remaining <= 0 ? serverTimestamp() : null
+  });
+
+  closePaymentModal();
+
+  document.getElementById("historyUserSelect")
+    .dispatchEvent(new Event("change"));
+
+  await loadDashboardSummary();
+};
+
+
+/* LEDGER */
 
 window.toggleLedger = async function (loanId, totalAmount) {
 
@@ -194,14 +189,14 @@ window.toggleLedger = async function (loanId, totalAmount) {
     const snap = await getDocs(q);
 
     let balance = totalAmount;
-    let ledgerHTML = "";
+    let html = `<div class="ledger-card"><div class="ledger-body">`;
 
     snap.forEach(docSnap => {
       const entry = docSnap.data();
       balance -= entry.amount;
 
-      ledgerHTML += `
-        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;">
+      html += `
+        <div class="ledger-item">
           <div>${new Date(entry.date).toLocaleDateString()}</div>
           <div style="color:green;">₹ ${entry.amount}</div>
           <div>₹ ${balance < 0 ? 0 : balance}</div>
@@ -209,44 +204,8 @@ window.toggleLedger = async function (loanId, totalAmount) {
       `;
     });
 
-    row.innerHTML = `<td colspan="8">${ledgerHTML || "No payments yet."}</td>`;
+    html += `</div></div>`;
+
+    row.innerHTML = `<td colspan="6">${html}</td>`;
   }
-};
-
-
-/* ========================= */
-/* 🔹 ADD PAYMENT */
-/* ========================= */
-
-window.addPayment = async function (loanId) {
-
-  const amount = prompt("Enter Payment Amount");
-  if (!amount) return;
-
-  const paymentAmount = parseFloat(amount);
-  if (isNaN(paymentAmount) || paymentAmount <= 0) return;
-
-  const loanRef = doc(db, "loans", loanId);
-  const loanSnap = await getDoc(loanRef);
-
-  let remaining = loanSnap.data().remainingAmount - paymentAmount;
-
-  await addDoc(collection(db, "ledger"), {
-    loanId,
-    userId: loanSnap.data().userId,
-    type: "credit",
-    amount: paymentAmount,
-    date: new Date().toISOString()
-  });
-
-  await updateDoc(loanRef, {
-    remainingAmount: remaining <= 0 ? 0 : remaining,
-    status: remaining <= 0 ? "closed" : "active",
-    closedDate: remaining <= 0 ? serverTimestamp() : null
-  });
-
-  document.getElementById("historyUserSelect")
-    ?.dispatchEvent(new Event("change"));
-
-  await loadDashboardSummary();
 };
