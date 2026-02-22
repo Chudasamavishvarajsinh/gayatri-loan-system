@@ -164,6 +164,80 @@ window.createLoan = async function(){
 
 
 /* ========================= */
+/* 🔹 USER LOAN HISTORY */
+/* ========================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const historySelect = document.getElementById("historyUserSelect");
+
+  if (!historySelect) return;
+
+  historySelect.addEventListener("change", async function(){
+
+    const userId = this.value;
+    const userInfoDiv = document.getElementById("selectedUserInfo");
+    const tableBody = document.querySelector("#loanHistoryTable tbody");
+
+    if(!userId){
+      tableBody.innerHTML = `<tr><td colspan="9">Select a user.</td></tr>`;
+      userInfoDiv.innerHTML = "";
+      return;
+    }
+
+    const user = usersData[userId];
+
+    userInfoDiv.innerHTML = `
+      <strong>Name:</strong> ${user?.name || "-"} <br>
+      <strong>Phone:</strong> ${user?.phone || "-"} <br>
+      <strong>Address:</strong> ${user?.address || "-"}
+    `;
+
+    const q = query(collection(db,"loans"), where("userId","==",userId));
+    const snap = await getDocs(q);
+
+    if(snap.empty){
+      tableBody.innerHTML = `<tr><td colspan="9">No loans found.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+
+    for (const docSnap of snap.docs) {
+
+      const d = docSnap.data();
+      const loanId = docSnap.id;
+
+      const startDate = d.startDate?.toDate ? d.startDate.toDate().toLocaleString() : "-";
+      const closedDate = d.closedDate?.toDate ? d.closedDate.toDate().toLocaleString() : "-";
+
+      let actionBtn = d.status === "active"
+        ? `<button onclick="addPayment('${loanId}')">Add Payment</button>`
+        : "-";
+
+      html += `
+        <tr>
+          <td>${loanId}</td>
+          <td>₹ ${d.principal}</td>
+          <td>₹ ${d.totalWithInterest}</td>
+          <td>₹ ${d.remainingAmount}</td>
+          <td class="status-${d.status}">${d.status}</td>
+          <td>${startDate}</td>
+          <td>${closedDate}</td>
+          <td>-</td>
+          <td>${actionBtn}</td>
+        </tr>
+      `;
+    }
+
+    tableBody.innerHTML = html;
+
+  });
+
+});
+
+
+/* ========================= */
 /* 🔹 ADD PAYMENT (FIXED) */
 /* ========================= */
 
@@ -217,3 +291,4 @@ window.addPayment = async function(loanId){
 
   await loadDashboardSummary();
 };
+
