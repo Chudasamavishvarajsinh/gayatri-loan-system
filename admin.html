@@ -382,6 +382,32 @@
             <button class="btn-ghost" style="padding: 10px 18px; border-radius: 8px; cursor: pointer;" onclick="closePaymentModal()">Cancel</button>
             <button class="btn-primary" style="width: auto; margin-top: 0;" onclick="submitPayment()">Save Payment</button>
         </div>
+        <div class="modal-overlay" id="ledgerModal">
+    <div class="modal" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin:0;">Loan Ledger (Payment History)</h3>
+            <button onclick="closeLedgerModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-muted)">&times;</button>
+        </div>
+        
+        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+            <table id="ledgerTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerTableBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="btn-ghost" style="padding: 10px 18px; border-radius: 8px; cursor:pointer;" onclick="closeLedgerModal()">Close</button>
+        </div>
+    </div>
+</div>
     </div>
 </div>
 
@@ -389,3 +415,4 @@
 
 </body>
 </html>
+
