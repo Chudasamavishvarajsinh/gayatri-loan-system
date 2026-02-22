@@ -11,7 +11,6 @@
             --secondary: #64748b;
             --dark: #0f172a;
             --light: #f8fafc;
-            --success: #10b981;
             --white: #ffffff;
             --border: #e2e8f0;
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -52,6 +51,7 @@
             margin-bottom: 10px;
             font-weight: 500;
             transition: 0.2s;
+            cursor: pointer;
         }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--white); }
 
@@ -92,7 +92,10 @@
             border-radius: 15px;
             margin-bottom: 15px;
             background: var(--light);
+            transition: 0.3s;
         }
+        .loan-item:hover { transform: scale(1.01); border-color: var(--primary); }
+        
         .loan-info h4 { margin: 0; font-size: 16px; color: var(--dark); }
         .loan-info p { margin: 5px 0 0; font-size: 13px; color: var(--secondary); }
 
@@ -125,21 +128,23 @@
             <a href="status.html" class="nav-item"><span>Track Status</span></a>
         </nav>
 
-        <div class="nav-item" style="color: #f87171; cursor: pointer;" onclick="logout()">Logout</div>
+        <div class="nav-item" style="color: #f87171; margin-top: auto;" onclick="logout()">Logout</div>
     </aside>
 
     <main class="main-container">
         <div class="header-bar">
             <div>
-                <h1 style="margin:0;">Welcome Back</h1>
-                <p style="color: var(--secondary); margin: 5px 0 0 0;">Here is your current financial summary.</p>
+                <h1 style="margin:0;">Dashboard</h1>
+                <p style="color: var(--secondary); margin: 5px 0 0 0;">Overview of your active loan accounts.</p>
             </div>
-            <button class="nav-item" style="background: var(--primary); color: white; border: none; padding: 10px 20px; cursor: pointer;" onclick="window.location.href='apply.html'">+ New Application</button>
+            <button onclick="window.location.href='apply.html'" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                + New Application
+            </button>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h3>Your Active Loans</h3>
+                <h3>Current Active Loans</h3>
             </div>
             <div id="loans">
                 <p style="text-align: center; color: var(--secondary); padding: 20px;">Checking for active loans...</p>
@@ -149,16 +154,15 @@
         <div class="card" style="background: var(--dark); color: white; border: none;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h3 style="margin:0; color: var(--primary);">Customer Support</h3>
-                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">Contact us for any payment queries.</p>
+                    <h3 style="margin:0; color: var(--primary);">Need Assistance?</h3>
+                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">Contact our office for payment support.</p>
                 </div>
                 <div style="text-align: right;">
                     <p style="margin:0; font-weight: 700;">Chudasama Baldevsinh</p>
-                    <p style="margin:5px 0 0; color: var(--primary);">+91 9924232759</p>
+                    <p style="margin:5px 0 0; color: var(--primary); font-size: 18px;">+91 9924232759</p>
                 </div>
             </div>
         </div>
-
     </main>
 
     <script type="module" src="js/user.js"></script>
