@@ -14,18 +14,14 @@ import {
   query,
   where,
   updateDoc,
-  serverTimestamp,
-  orderBy
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 
 let usersData = {};
 let currentLoanId = null;
 
 
-/* ========================= */
-/* 🔐 ADMIN AUTH PROTECTION */
-/* ========================= */
+/* ================= ADMIN AUTH ================= */
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -49,9 +45,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 
-/* ========================= */
-/* 🔹 LOAD USERS */
-/* ========================= */
+/* ================= LOAD USERS ================= */
 
 async function loadUsers() {
 
@@ -70,9 +64,7 @@ async function loadUsers() {
 }
 
 
-/* ========================= */
-/* 📊 DASHBOARD SUMMARY */
-/* ========================= */
+/* ================= DASHBOARD ================= */
 
 async function loadDashboardSummary() {
 
@@ -84,7 +76,6 @@ async function loadDashboardSummary() {
   let outstanding = 0;
 
   loansSnap.forEach(docSnap => {
-
     const loan = docSnap.data();
 
     if (loan.status === "active") {
@@ -92,9 +83,7 @@ async function loadDashboardSummary() {
       outstanding += loan.remainingAmount || 0;
     }
 
-    if (loan.status === "closed") {
-      closed++;
-    }
+    if (loan.status === "closed") closed++;
   });
 
   document.getElementById("totalUsers").innerText = usersSnap.size;
@@ -104,16 +93,11 @@ async function loadDashboardSummary() {
 }
 
 
-/* ========================= */
-/* 🔹 USER HISTORY */
-/* ========================= */
+/* ================= USER HISTORY ================= */
 
 function setupListener() {
-
-  const select = document.getElementById("historyUserSelect");
-  if (!select) return;
-
-  select.addEventListener("change", handleUserHistory);
+  document.getElementById("historyUserSelect")
+    ?.addEventListener("change", handleUserHistory);
 }
 
 
@@ -164,9 +148,7 @@ async function handleUserHistory() {
 }
 
 
-/* ========================= */
-/* 💳 PAYMENT MODAL */
-/* ========================= */
+/* ================= PAYMENT ================= */
 
 window.openPaymentModal = function (loanId) {
   currentLoanId = loanId;
@@ -191,17 +173,15 @@ window.submitPayment = async function () {
   const loanRef = doc(db, "loans", currentLoanId);
   const loanSnap = await getDoc(loanRef);
 
-  if (!loanSnap.exists()) return;
-
   let remaining = loanSnap.data().remainingAmount - amount;
 
-  // Store BOTH server time + readable date
   await addDoc(collection(db, "ledger"), {
     loanId: currentLoanId,
     userId: loanSnap.data().userId,
     type: "credit",
     amount: amount,
     createdAt: serverTimestamp(),
+    date: new Date().toISOString(),
     dateString: new Date().toLocaleString()
   });
 
@@ -214,15 +194,13 @@ window.submitPayment = async function () {
   closePaymentModal();
 
   document.getElementById("historyUserSelect")
-    .dispatchEvent(new Event("change"));
+    ?.dispatchEvent(new Event("change"));
 
   await loadDashboardSummary();
 };
 
 
-/* ========================= */
-/* 📒 LEDGER */
-/* ========================= */
+/* ================= LEDGER (FIXED) ================= */
 
 window.toggleLedger = async function (loanId, totalAmount) {
 
@@ -232,13 +210,26 @@ window.toggleLedger = async function (loanId, totalAmount) {
 
   if (!isOpen) {
 
-    const q = query(
-      collection(db, "ledger"),
-      where("loanId", "==", loanId),
-      orderBy("createdAt", "asc")
-    );
-
+    const q = query(collection(db, "ledger"), where("loanId", "==", loanId));
     const snap = await getDocs(q);
+
+    if (snap.empty) {
+      row.innerHTML = `<td colspan="6">No payments yet</td>`;
+      return;
+    }
+
+    let entries = [];
+
+    snap.forEach(docSnap => {
+      entries.push(docSnap.data());
+    });
+
+    // Sort safely in JS
+    entries.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date) : new Date();
+      const dateB = b.date ? new Date(b.date) : new Date();
+      return dateA - dateB;
+    });
 
     let balance = totalAmount;
 
@@ -248,12 +239,13 @@ window.toggleLedger = async function (loanId, totalAmount) {
         <div class="ledger-body">
     `;
 
-    snap.forEach(docSnap => {
+    entries.forEach(entry => {
 
-      const entry = docSnap.data();
       balance -= entry.amount;
 
-      const dateTime = entry.dateString || "-";
+      const dateTime =
+        entry.dateString ||
+        (entry.date ? new Date(entry.date).toLocaleString() : "-");
 
       html += `
         <div class="ledger-item">
@@ -264,19 +256,14 @@ window.toggleLedger = async function (loanId, totalAmount) {
       `;
     });
 
-    html += `
-        </div>
-      </div>
-    `;
+    html += `</div></div>`;
 
     row.innerHTML = `<td colspan="6">${html}</td>`;
   }
 };
 
 
-/* ========================= */
-/* 🔓 LOGOUT */
-/* ========================= */
+/* ================= LOGOUT ================= */
 
 window.logout = async function () {
   await signOut(auth);
