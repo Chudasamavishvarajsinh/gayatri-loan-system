@@ -1,57 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Admin Login</title>
-<style>
-body{
-    font-family:Arial;
-    background:#f4f6f9;
-}
-.box{
-    width:350px;
-    background:white;
-    margin:100px auto;
-    padding:30px;
-    border-radius:8px;
-}
-input,button{
-    width:100%;
-    padding:10px;
-    margin:10px 0;
-}
-button{
-    background:#007bff;
-    color:white;
-    border:none;
-    cursor:pointer;
-}
-.user-btn{
-    background:#28a745;
-}
-hr{
-    margin:20px 0;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Terminal | Gayatri Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --admin-primary: #3b82f6;
+            --admin-dark: #0f172a;
+            --admin-surface: #1e293b;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --error: #ef4444;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--admin-dark);
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--admin-surface);
+            width: 100%;
+            max-width: 400px;
+            padding: 45px;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header { text-align: center; margin-bottom: 35px; }
+        .header .icon { 
+            background: rgba(59, 130, 246, 0.1); 
+            color: var(--admin-primary);
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .header h2 { margin: 0; font-size: 24px; color: var(--text-light); letter-spacing: -0.5px; }
+        .header p { margin: 10px 0 0; color: var(--text-muted); font-size: 14px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            font-size: 12px; 
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            background: rgba(15, 23, 42, 0.5);
+            color: white;
+            transition: 0.3s;
+        }
+
+        input:focus { 
+            outline: none; 
+            border-color: var(--admin-primary); 
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); 
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--admin-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover { 
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        #msg {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--error);
+            font-weight: 500;
+        }
+
+        .back-site {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .back-site:hover { color: var(--text-light); }
+
+    </style>
 </head>
 <body>
 
-<div class="box">
-<h3>Admin Login</h3>
+    <div class="login-card">
+        <div class="header">
+            <div class="icon">🔒</div>
+            <h2>Admin Terminal</h2>
+            <p>Authorized personnel only</p>
+        </div>
 
-<input type="email" id="email" placeholder="Admin Email">
-<input type="password" id="password" placeholder="Password">
+        <div class="form-group">
+            <label>Admin ID / Email</label>
+            <input type="email" id="email" placeholder="admin@gayatri.com">
+        </div>
 
-<button onclick="adminLogin()">Login</button>
+        <div class="form-group">
+            <label>Security Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
 
-<hr>
+        <button class="btn-login" onclick="loginAdmin()">Secure Login</button>
+        <p id="msg"></p>
 
-<button class="user-btn" onclick="location.href='index.html'">
-User Login
-</button>
+        <a href="index.html" class="back-site">← Return to Public Site</a>
+    </div>
 
-<p id="msg"></p>
-</div>
+    <script type="module" src="js/admin-login.js"></script>
 
-<script type="module" src="js/admin-auth.js"></script>
 </body>
 </html>
