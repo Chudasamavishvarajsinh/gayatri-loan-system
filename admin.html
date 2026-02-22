@@ -6,40 +6,55 @@
 <style>
 body{
     font-family:Segoe UI,Arial,sans-serif;
-    background:#f3f6fb;
+    background:#f4f6fb;
     padding:30px;
     margin:0;
 }
 
 /* HEADER */
 
+.header{
+    background:#1e293b;
+    color:white;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:25px;
+}
+
+.header h1{
+    margin:0;
+}
+
+.header p{
+    margin:5px 0 0 0;
+    font-size:14px;
+    opacity:0.9;
+}
+
 .top-bar{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:25px;
+    margin-bottom:20px;
 }
 
 .logout{
-    background:#dc3545;
-    color:#fff;
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
 }
 
 /* CARD */
 
 .card{
-    background:#fff;
+    background:white;
     padding:20px;
-    margin-bottom:25px;
     border-radius:14px;
     box-shadow:0 8px 20px rgba(0,0,0,0.06);
-}
-
-/* SUMMARY */
-
-.summary p{
-    margin:6px 0;
-    font-size:15px;
+    margin-bottom:25px;
 }
 
 /* TABLE */
@@ -48,66 +63,69 @@ table{
     width:100%;
     border-collapse:collapse;
     margin-top:15px;
-    font-size:14px;
 }
 
 th{
-    background:#eef2ff;
+    background:#e2e8f0;
     padding:12px;
     text-align:left;
 }
 
 td{
     padding:12px;
-    border-bottom:1px solid #eee;
+    border-bottom:1px solid #e5e7eb;
 }
+
+/* LOAN COLORS */
 
 .loan-active{
     background:#ffffff;
 }
 
 .loan-closed{
-    background:#f0fdf4;
+    background:#ecfdf5;
 }
 
 /* STATUS */
 
 .status{
-    padding:5px 10px;
+    padding:4px 10px;
     border-radius:20px;
     font-size:12px;
     font-weight:600;
 }
 
 .active{
-    background:#fff3cd;
-    color:#856404;
+    background:#fef3c7;
+    color:#92400e;
 }
 
 .closed{
-    background:#c3e6cb;
-    color:#155724;
+    background:#bbf7d0;
+    color:#065f46;
 }
 
 /* BUTTONS */
 
-button{
-    padding:6px 12px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:600;
-    font-size:13px;
-}
-
-.btn-primary{
+.btn-add{
     background:#2563eb;
-    color:#fff;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    font-weight:600;
+    cursor:pointer;
 }
 
-.btn-secondary{
-    background:#64748b;
-    color:#fff;
+.btn-ledger{
+    background:#475569;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    font-weight:600;
+    cursor:pointer;
+    margin-left:5px;
 }
 
 /* LEDGER */
@@ -128,7 +146,7 @@ button{
 }
 
 .ledger-body{
-    max-height:200px;
+    max-height:220px;
     overflow-y:auto;
 }
 
@@ -137,7 +155,6 @@ button{
     justify-content:space-between;
     padding:8px 0;
     border-bottom:1px solid #e5e7eb;
-    font-size:13px;
 }
 
 .credit{
@@ -161,15 +178,10 @@ button{
 }
 
 .modal{
-    background:#fff;
+    background:white;
     padding:25px;
     width:360px;
     border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-.modal h3{
-    margin-top:0;
 }
 
 .modal input{
@@ -186,17 +198,25 @@ button{
     justify-content:flex-end;
     gap:10px;
 }
+
 </style>
 </head>
 
 <body>
+
+<div class="header">
+    <h1>Gayatri Electronics</h1>
+    <p>Owner: Chudasama Baldevsinh Mansang</p>
+    <p>Phone: 9924232759</p>
+    <p>Gujarat, India</p>
+</div>
 
 <div class="top-bar">
     <h2>Admin Dashboard</h2>
     <button class="logout" onclick="logout()">Logout</button>
 </div>
 
-<div class="card summary">
+<div class="card">
 <p>Total Users: <strong id="totalUsers">0</strong></p>
 <p>Active Loans: <strong id="totalActiveLoans">0</strong></p>
 <p>Closed Loans: <strong id="totalClosedLoans">0</strong></p>
@@ -227,15 +247,13 @@ button{
 </table>
 </div>
 
-<!-- PAYMENT MODAL -->
-
 <div class="modal-overlay" id="paymentModal">
 <div class="modal">
 <h3>Add Payment</h3>
 <input type="number" id="paymentAmountInput" placeholder="Enter amount">
 <div class="modal-buttons">
-<button class="btn-secondary" onclick="closePaymentModal()">Cancel</button>
-<button class="btn-primary" onclick="submitPayment()">Save</button>
+<button onclick="closePaymentModal()">Cancel</button>
+<button class="btn-add" onclick="submitPayment()">Save Payment</button>
 </div>
 </div>
 </div>
