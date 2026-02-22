@@ -1,28 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Apply Loan</title>
-<style>
-body{font-family:Arial;background:#eef2f7}
-.box{width:400px;background:white;margin:50px auto;padding:30px;border-radius:8px}
-input,textarea,button{width:100%;padding:10px;margin:10px 0}
-button{background:#28a745;color:white;border:none}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for a Loan | Gayatri Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .apply-container {
+            background: var(--white);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h2 { margin: 0; font-size: 26px; color: var(--dark); }
+        .header p { margin: 8px 0 0; color: var(--text-muted); font-size: 14px; }
+
+        /* FORM GROUPS */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            font-size: 13px; 
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background-color: var(--light);
+            color: var(--text-main);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            background-color: var(--white);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover { 
+            background: var(--primary-hover); 
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+
+        /* ALERT BOX */
+        #msg {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+            color: #166534; /* Success green */
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .back-link:hover { color: var(--primary); }
+    </style>
 </head>
 <body>
 
-<div class="box">
-<h3>Apply For Loan</h3>
+    <div class="apply-container">
+        <div class="header">
+            <h2>Loan Application</h2>
+            <p>Fill out the details below to submit your request securely.</p>
+        </div>
 
-<input type="text" id="name" placeholder="Full Name">
-<input type="text" id="phone" placeholder="Phone Number">
-<textarea id="address" placeholder="Address"></textarea>
-<input type="number" id="amount" placeholder="Loan Amount">
+        <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="As per your official documents">
+        </div>
 
-<button onclick="applyLoan()">Submit Application</button>
-<p id="msg"></p>
-</div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="phone" placeholder="10-digit mobile number">
+        </div>
 
-<script type="module" src="js/apply.js"></script>
+        <div class="form-group">
+            <label>Residential Address</label>
+            <textarea id="address" placeholder="Enter your full street address, city, and pincode"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Requested Loan Amount (₹)</label>
+            <input type="number" id="amount" placeholder="e.g. 50000">
+        </div>
+
+        <button class="btn-submit" onclick="applyLoan()">Submit Application</button>
+        <p id="msg"></p>
+
+        <a href="user-dashboard.html" class="back-link">← Cancel and Return</a>
+    </div>
+
+    <script type="module" src="js/apply.js"></script>
+
 </body>
 </html>
