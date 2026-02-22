@@ -1,43 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>User Dashboard - Gayatri Electronic</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Portal | Gayatri Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            margin: 0;
+            background-color: var(--light);
+            color: var(--dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: var(--dark);
+            color: var(--white);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s;
+        }
+
+        .sidebar h2 { font-size: 22px; color: var(--primary); margin-bottom: 5px; }
+        .sidebar p { font-size: 13px; color: #94a3b8; margin-bottom: 40px; }
+
+        .nav-menu { flex: 1; }
+        .nav-item {
+            display: block;
+            padding: 12px 15px;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--white); }
+
+        /* MAIN CONTENT */
+        .main-container {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        /* GRID SYSTEM */
+        .user-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .card-header { border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
+        .card-header h3 { margin: 0; font-size: 18px; }
+
+        /* FORMS & BUTTONS */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: var(--secondary); margin-bottom: 6px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+
+        /* LOAN LIST */
+        .loan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+
+        @media (max-width: 1024px) {
+            .user-grid { grid-template-columns: 1fr; }
+            .sidebar { width: 80px; padding: 15px; }
+            .sidebar h2, .sidebar p, .nav-item span { display: none; }
+            .main-container { margin-left: 80px; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="sidebar">
-<h2>Gayatri Electronic</h2>
-<p>Chudasama Baldevsinh<br>9924232759</p>
+    <aside class="sidebar">
+        <h2>Gayatri</h2>
+        <p>Electronic Services</p>
+        
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">Dashboard</a>
+            <a href="history.html" class="nav-item">Loan History</a>
+            <a href="status.html" class="nav-item">Track Status</a>
+        </nav>
 
-<a href="#">Dashboard</a>
-<a href="#">Apply Loan</a>
-<a href="#">EMI Calculator</a>
-<a href="index.html">Logout</a>
-</div>
+        <div class="nav-item" style="color: #f87171; cursor: pointer;" onclick="logout()">Logout</div>
+    </aside>
 
-<div class="main">
+    <main class="main-container">
+        <div class="header-bar">
+            <div>
+                <h1 style="margin:0;">Welcome Back</h1>
+                <p style="color: var(--secondary); margin: 5px 0 0 0;">Manage your electronic loans and payments.</p>
+            </div>
+        </div>
 
-<div class="card">
-<h2>Apply for Loan</h2>
+        <div class="user-grid">
+            <div class="content-left">
+                <div class="card">
+                    <div class="card-header"><h3>Apply for New Loan</h3></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-group">
+                            <label>Required Amount (₹)</label>
+                            <input type="number" id="amount" placeholder="e.g. 5000">
+                        </div>
+                        <div class="input-group">
+                            <label>Interest Rate (%)</label>
+                            <input type="number" id="rate" placeholder="e.g. 2">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Duration (Months)</label>
+                        <input type="number" id="months" placeholder="e.g. 12">
+                    </div>
+                    <button class="btn-action" onclick="applyLoan()">Submit Loan Application</button>
+                </div>
 
-<input type="number" id="amount" placeholder="Loan Amount">
-<input type="number" id="rate" placeholder="Interest %">
-<input type="number" id="months" placeholder="Months">
+                <div class="card">
+                    <div class="card-header"><h3>Your Active Loans</h3></div>
+                    <div id="loans">
+                        <p style="text-align: center; color: var(--secondary); padding: 20px;">No active loans found.</p>
+                    </div>
+                </div>
+            </div>
 
-<button onclick="applyLoan()">Apply Loan</button>
-</div>
+            <div class="content-right">
+                <div class="card" style="background: var(--dark); color: white; border: none;">
+                    <div class="card-header" style="border-color: rgba(255,255,255,0.1);">
+                        <h3 style="color: var(--primary);">EMI Calculator</h3>
+                    </div>
+                    <p style="font-size: 13px; color: #94a3b8;">Plan your finances before applying.</p>
+                    <button class="btn-action" style="margin-top: 15px;" onclick="calculate()">Open Calculator</button>
+                    <div id="emiResult" style="margin-top: 20px; font-weight: 600; text-align: center; font-size: 18px;"></div>
+                </div>
 
-<div class="card">
-<h2>EMI Calculator</h2>
+                <div class="card">
+                    <div class="card-header"><h3>Contact Support</h3></div>
+                    <p style="font-size: 14px; margin-bottom: 5px;"><strong>Owner:</strong> Chudasama Baldevsinh</p>
+                    <p style="font-size: 14px; color: var(--primary); font-weight: 700;">+91 9924232759</p>
+                    <p style="font-size: 12px; color: var(--secondary); margin-top: 15px;">Jamnagar, Gujarat 361006</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
-<button onclick="calculate()">Calculate EMI</button>
-<p id="emiResult" style="margin-top:15px;"></p>
-</div>
+    <script type="module" src="js/user.js"></script>
+    <script type="module" src="js/user-dashboard.js"></script>
+    <script src="js/emi.js"></script>
 
-</div>
-
-<script type="module" src="js/user.js"></script>
-<script src="js/emi.js"></script>
 </body>
 </html>
