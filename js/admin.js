@@ -14,7 +14,8 @@ import {
   query,
   where,
   updateDoc,
-  serverTimestamp
+  serverTimestamp,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -26,7 +27,7 @@ let usersData = {};
 
 
 /* ========================= */
-/* 🔒 ADMIN AUTH PROTECTION */
+/* 🔒 ADMIN AUTH */
 /* ========================= */
 
 onAuthStateChanged(auth, async (user) => {
@@ -77,23 +78,17 @@ async function loadUsers() {
 
     usersData[docSnap.id] = data;
 
-    const option1 = document.createElement("option");
-    option1.value = docSnap.id;
-    option1.textContent = data.name;
-    createLoanSelect.appendChild(option1);
+    const opt1 = new Option(data.name, docSnap.id);
+    const opt2 = new Option(data.name, docSnap.id);
 
-    const option2 = document.createElement("option");
-    option2.value = docSnap.id;
-    option2.textContent = data.name;
-    historySelect.appendChild(option2);
+    createLoanSelect.appendChild(opt1);
+    historySelect.appendChild(opt2);
   });
-
-  console.log("Users Loaded:", Object.keys(usersData).length);
 }
 
 
 /* ========================= */
-/* 📊 DASHBOARD SUMMARY */
+/* 📊 DASHBOARD */
 /* ========================= */
 
 async function loadDashboardSummary() {
@@ -101,28 +96,25 @@ async function loadDashboardSummary() {
   const usersSnap = await getDocs(collection(db, "users"));
   const loansSnap = await getDocs(collection(db, "loans"));
 
-  let activeCount = 0;
-  let closedCount = 0;
-  let totalOutstanding = 0;
+  let active = 0;
+  let closed = 0;
+  let outstanding = 0;
 
   loansSnap.forEach(docSnap => {
-
     const loan = docSnap.data();
 
     if (loan.status === "active") {
-      activeCount++;
-      totalOutstanding += loan.remainingAmount || 0;
+      active++;
+      outstanding += loan.remainingAmount || 0;
     }
 
-    if (loan.status === "closed") {
-      closedCount++;
-    }
+    if (loan.status === "closed") closed++;
   });
 
   document.getElementById("totalUsers").innerText = usersSnap.size;
-  document.getElementById("totalActiveLoans").innerText = activeCount;
-  document.getElementById("totalClosedLoans").innerText = closedCount;
-  document.getElementById("totalOutstanding").innerText = "₹ " + totalOutstanding;
+  document.getElementById("totalActiveLoans").innerText = active;
+  document.getElementById("totalClosedLoans").innerText = closed;
+  document.getElementById("totalOutstanding").innerText = "₹ " + outstanding;
 }
 
 
@@ -152,8 +144,8 @@ window.createLoan = async function () {
     return;
   }
 
-  const interestAmount = (principal * rate * months) / 100;
-  const totalWithInterest = principal + interestAmount;
+  const interest = (principal * rate * months) / 100;
+  const total = principal + interest;
 
   await addDoc(collection(db, "loans"), {
     userId,
@@ -161,14 +153,13 @@ window.createLoan = async function () {
     interestRate: rate,
     months,
     totalWithoutInterest: principal,
-    totalWithInterest,
-    remainingAmount: totalWithInterest,
+    totalWithInterest: total,
+    remainingAmount: total,
     status: "active",
     startDate: serverTimestamp()
   });
 
   alert("Loan Created Successfully");
-
   await loadDashboardSummary();
 };
 
@@ -179,10 +170,10 @@ window.createLoan = async function () {
 
 function setupUserHistoryListener() {
 
-  const historySelect = document.getElementById("historyUserSelect");
-  if (!historySelect) return;
+  const select = document.getElementById("historyUserSelect");
+  if (!select) return;
 
-  historySelect.addEventListener("change", handleUserHistoryChange);
+  select.addEventListener("change", handleUserHistoryChange);
 }
 
 
@@ -196,7 +187,7 @@ async function handleUserHistoryChange() {
   if (!tableBody || !userInfoDiv) return;
 
   if (!userId) {
-    tableBody.innerHTML = `<tr><td colspan="9">Select a user.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="8">Select a user.</td></tr>`;
     userInfoDiv.innerHTML = "";
     return;
   }
@@ -213,7 +204,7 @@ async function handleUserHistoryChange() {
   const snap = await getDocs(q);
 
   if (snap.empty) {
-    tableBody.innerHTML = `<tr><td colspan="9">No loans found.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="8">No loans found.</td></tr>`;
     return;
   }
 
@@ -224,17 +215,8 @@ async function handleUserHistoryChange() {
     const d = docSnap.data();
     const loanId = docSnap.id;
 
-    const startDate = d.startDate?.toDate
-      ? d.startDate.toDate().toLocaleString()
-      : "-";
-
-    const closedDate = d.closedDate?.toDate
-      ? d.closedDate.toDate().toLocaleString()
-      : "-";
-
-    const actionBtn = d.status === "active"
-      ? `<button onclick="addPayment('${loanId}')">Add Payment</button>`
-      : "-";
+    const startDate = d.startDate?.toDate?.().toLocaleString() || "-";
+    const closedDate = d.closedDate?.toDate?.().toLocaleString() || "-";
 
     html += `
       <tr>
@@ -242,16 +224,87 @@ async function handleUserHistoryChange() {
         <td>₹ ${d.principal}</td>
         <td>₹ ${d.totalWithInterest}</td>
         <td>₹ ${d.remainingAmount}</td>
-        <td class="status-${d.status}">${d.status}</td>
+        <td>${d.status}</td>
         <td>${startDate}</td>
         <td>${closedDate}</td>
-        <td>-</td>
-        <td>${actionBtn}</td>
+        <td>
+          <button onclick="addPayment('${loanId}')">Add Payment</button>
+          <button onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">View Ledger</button>
+        </td>
+      </tr>
+      <tr id="ledger-row-${loanId}" style="display:none;">
+        <td colspan="8">
+          <div id="ledger-${loanId}" style="max-height:200px; overflow-y:auto;"></div>
+        </td>
       </tr>
     `;
   });
 
   tableBody.innerHTML = html;
+}
+
+
+/* ========================= */
+/* 🔹 TOGGLE LEDGER */
+/* ========================= */
+
+window.toggleLedger = async function (loanId, totalAmount) {
+
+  const row = document.getElementById(`ledger-row-${loanId}`);
+  const container = document.getElementById(`ledger-${loanId}`);
+
+  if (!row || !container) return;
+
+  if (row.style.display === "none") {
+    row.style.display = "table-row";
+    await loadLedger(loanId, totalAmount, container);
+  } else {
+    row.style.display = "none";
+  }
+};
+
+
+async function loadLedger(loanId, totalAmount, container) {
+
+  const q = query(
+    collection(db, "ledger"),
+    where("loanId", "==", loanId),
+    orderBy("date", "asc")
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    container.innerHTML = "No payments yet.";
+    return;
+  }
+
+  let balance = totalAmount;
+  let html = `
+    <table style="width:100%; border-collapse:collapse;">
+      <tr>
+        <th>Date</th>
+        <th>Credit</th>
+        <th>Balance</th>
+      </tr>
+  `;
+
+  snap.forEach(docSnap => {
+
+    const entry = docSnap.data();
+    balance -= entry.amount;
+
+    html += `
+      <tr>
+        <td>${new Date(entry.date).toLocaleString()}</td>
+        <td>₹ ${entry.amount}</td>
+        <td>₹ ${balance < 0 ? 0 : balance}</td>
+      </tr>
+    `;
+  });
+
+  html += "</table>";
+  container.innerHTML = html;
 }
 
 
@@ -265,7 +318,6 @@ window.addPayment = async function (loanId) {
   if (!amount) return;
 
   const paymentAmount = parseFloat(amount);
-
   if (isNaN(paymentAmount) || paymentAmount <= 0) {
     alert("Invalid amount");
     return;
@@ -273,14 +325,9 @@ window.addPayment = async function (loanId) {
 
   const loanRef = doc(db, "loans", loanId);
   const loanSnap = await getDoc(loanRef);
+  if (!loanSnap.exists()) return;
 
-  if (!loanSnap.exists()) {
-    alert("Loan not found");
-    return;
-  }
-
-  let remaining = loanSnap.data().remainingAmount;
-  remaining -= paymentAmount;
+  let remaining = loanSnap.data().remainingAmount - paymentAmount;
 
   await addDoc(collection(db, "ledger"), {
     loanId,
@@ -291,24 +338,14 @@ window.addPayment = async function (loanId) {
   });
 
   if (remaining <= 0) {
-
     remaining = 0;
-
     await updateDoc(loanRef, {
       remainingAmount: 0,
       status: "closed",
       closedDate: serverTimestamp()
     });
-
-    alert("Loan Fully Paid");
-
   } else {
-
-    await updateDoc(loanRef, {
-      remainingAmount: remaining
-    });
-
-    alert("Payment Recorded");
+    await updateDoc(loanRef, { remainingAmount: remaining });
   }
 
   document.getElementById("historyUserSelect")
