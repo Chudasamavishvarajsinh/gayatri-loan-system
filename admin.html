@@ -6,10 +6,12 @@
 <style>
 body{
     font-family:Segoe UI,Arial,sans-serif;
-    background:#f4f6f9;
+    background:#f3f6fb;
     padding:30px;
     margin:0;
 }
+
+/* HEADER */
 
 .top-bar{
     display:flex;
@@ -18,103 +20,164 @@ body{
     margin-bottom:25px;
 }
 
-button{
-    padding:8px 14px;
-    border-radius:6px;
-    border:none;
-    cursor:pointer;
-    font-weight:600;
+.logout{
+    background:#dc3545;
+    color:#fff;
 }
 
-.logout{background:#dc3545;color:#fff;}
-.btn-primary{background:#2563eb;color:#fff;}
-.btn-secondary{background:#475569;color:#fff;}
+/* CARD */
 
 .card{
     background:#fff;
     padding:20px;
     margin-bottom:25px;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.06);
 }
 
-input,select{
-    padding:10px;
+/* SUMMARY */
+
+.summary p{
     margin:6px 0;
-    width:100%;
-    border-radius:6px;
-    border:1px solid #ccc;
+    font-size:15px;
 }
+
+/* TABLE */
 
 table{
     width:100%;
     border-collapse:collapse;
     margin-top:15px;
+    font-size:14px;
 }
 
-th,td{
+th{
+    background:#eef2ff;
+    padding:12px;
+    text-align:left;
+}
+
+td{
     padding:12px;
     border-bottom:1px solid #eee;
 }
 
-th{background:#f9fafc;}
+.loan-active{
+    background:#ffffff;
+}
 
-.status-badge{
-    padding:4px 10px;
+.loan-closed{
+    background:#f0fdf4;
+}
+
+/* STATUS */
+
+.status{
+    padding:5px 10px;
     border-radius:20px;
     font-size:12px;
     font-weight:600;
 }
 
-.active{background:#fff3cd;color:#856404;}
-.closed{background:#d4edda;color:#155724;}
+.active{
+    background:#fff3cd;
+    color:#856404;
+}
 
-.ledger-row{display:none;}
+.closed{
+    background:#c3e6cb;
+    color:#155724;
+}
+
+/* BUTTONS */
+
+button{
+    padding:6px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:13px;
+}
+
+.btn-primary{
+    background:#2563eb;
+    color:#fff;
+}
+
+.btn-secondary{
+    background:#64748b;
+    color:#fff;
+}
+
+/* LEDGER */
+
+.ledger-row{
+    display:none;
+}
 
 .ledger-card{
     background:#f8fafc;
-    padding:15px;
     border-radius:10px;
-    margin-top:10px;
+    padding:15px;
+}
+
+.ledger-header{
+    font-weight:600;
+    margin-bottom:10px;
 }
 
 .ledger-body{
-    max-height:180px;
+    max-height:200px;
     overflow-y:auto;
 }
 
 .ledger-item{
     display:flex;
     justify-content:space-between;
-    padding:6px 0;
-    border-bottom:1px solid #eee;
+    padding:8px 0;
+    border-bottom:1px solid #e5e7eb;
+    font-size:13px;
 }
 
-/* PAYMENT MODAL */
+.credit{
+    color:#16a34a;
+    font-weight:600;
+}
+
+.balance{
+    font-weight:600;
+}
+
+/* MODAL */
 
 .modal-overlay{
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
+    inset:0;
     background:rgba(0,0,0,0.5);
     display:none;
     justify-content:center;
     align-items:center;
-    z-index:1000;
 }
 
 .modal{
     background:#fff;
     padding:25px;
+    width:360px;
     border-radius:12px;
-    width:350px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 .modal h3{
     margin-top:0;
+}
+
+.modal input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
 }
 
 .modal-buttons{
@@ -133,8 +196,7 @@ th{background:#f9fafc;}
     <button class="logout" onclick="logout()">Logout</button>
 </div>
 
-<div class="card">
-<h3>Dashboard Summary</h3>
+<div class="card summary">
 <p>Total Users: <strong id="totalUsers">0</strong></p>
 <p>Active Loans: <strong id="totalActiveLoans">0</strong></p>
 <p>Closed Loans: <strong id="totalClosedLoans">0</strong></p>
@@ -147,8 +209,6 @@ th{background:#f9fafc;}
 <select id="historyUserSelect">
 <option value="">Select User</option>
 </select>
-
-<div id="selectedUserInfo"></div>
 
 <table id="loanHistoryTable">
 <thead>
@@ -170,17 +230,14 @@ th{background:#f9fafc;}
 <!-- PAYMENT MODAL -->
 
 <div class="modal-overlay" id="paymentModal">
-    <div class="modal">
-        <h3>Add Payment</h3>
-
-        <label>Amount</label>
-        <input type="number" id="paymentAmountInput">
-
-        <div class="modal-buttons">
-            <button class="btn-secondary" onclick="closePaymentModal()">Cancel</button>
-            <button class="btn-primary" onclick="submitPayment()">Save Payment</button>
-        </div>
-    </div>
+<div class="modal">
+<h3>Add Payment</h3>
+<input type="number" id="paymentAmountInput" placeholder="Enter amount">
+<div class="modal-buttons">
+<button class="btn-secondary" onclick="closePaymentModal()">Cancel</button>
+<button class="btn-primary" onclick="submitPayment()">Save</button>
+</div>
+</div>
 </div>
 
 <script type="module" src="js/admin.js"></script>
