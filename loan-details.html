@@ -1,29 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Loan Details</title>
-<style>
-body { font-family:Arial; padding:30px; background:#f2f2f2; }
-.card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; }
-table { width:100%; border-collapse:collapse; }
-th, td { border:1px solid #ccc; padding:8px; text-align:center; }
-th { background:#eee; }
-button { padding:10px; background:#007bff; color:white; border:none; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Statement | Gayatri Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --white: #ffffff;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            margin: 0;
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+        }
+
+        /* HEADER SECTION */
+        .statement-header {
+            background: var(--dark);
+            color: white;
+            padding: 40px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-label { font-size: 14px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .balance-amount { font-size: 36px; font-weight: 700; margin-top: 5px; }
+
+        .loan-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* DETAILS GRID */
+        .details-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
+        .detail-item span { font-weight: 600; font-size: 15px; }
+
+        /* TRANSACTION TABLE */
+        .ledger-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .ledger-card h3 { margin-top: 0; font-size: 18px; margin-bottom: 20px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 12px; color: var(--text-muted); text-transform: uppercase; padding: 15px 10px; border-bottom: 2px solid var(--light); }
+        td { padding: 15px 10px; border-bottom: 1px solid var(--light); font-size: 14px; }
+
+        .type-credit { color: var(--success); font-weight: 700; }
+        .type-debit { color: var(--dark); font-weight: 600; }
+
+        .back-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: 0.2s;
+        }
+        .back-btn:hover { color: var(--primary); }
+
+        @media (max-width: 600px) {
+            .statement-header { flex-direction: column; text-align: center; gap: 20px; }
+            .details-card { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
-<h1>Loan Details</h1>
-<button onclick="goBack()">Back</button>
+    <div class="container">
+        <a href="user.html" class="back-btn">← Back to Dashboard</a>
 
-<div class="card" id="loanInfo"></div>
+        <div class="statement-header">
+            <div>
+                <div class="balance-label">Remaining Balance</div>
+                <div class="balance-amount" id="remainingAmount">₹ 0</div>
+            </div>
+            <div class="loan-badge" id="loanIdDisplay">Loan ID: Loading...</div>
+        </div>
 
-<div class="card">
-  <h3>Ledger</h3>
-  <div id="ledgerTable"></div>
-</div>
+        <div class="details-card">
+            <div class="detail-item">
+                <label>Principal Amount</label>
+                <span id="principal">₹ 0</span>
+            </div>
+            <div class="detail-item">
+                <label>Interest Rate</label>
+                <span id="interestRate">0%</span>
+            </div>
+            <div class="detail-item">
+                <label>Total with Interest</label>
+                <span id="totalWithInterest">₹ 0</span>
+            </div>
+        </div>
 
-<script type="module" src="js/loan-details.js"></script>
+        <div class="ledger-card">
+            <h3>Payment Ledger</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="ledgerTable">
+                    </tbody>
+            </table>
+        </div>
+        
+        <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 30px;">
+            Gayatri Electronics | Jamnagar, Gujarat
+        </p>
+    </div>
+
+    <script type="module" src="js/loan-details.js"></script>
 
 </body>
 </html>
