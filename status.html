@@ -1,27 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Check Loan Status</title>
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Application | Gayatri Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --pending: #f59e0b;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            margin: 0;
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 { font-size: 28px; margin: 0; }
+        .header p { color: var(--text-muted); margin-top: 8px; }
+
+        /* TRACKING CARD */
+        .status-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* TIMELINE DESIGN */
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--border);
+        }
+
+        .step {
+            position: relative;
+            margin-bottom: 35px;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 5px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 3px solid var(--border);
+            z-index: 1;
+        }
+
+        /* Active/Complete Step Styling */
+        .step.active::before { border-color: var(--primary); background: var(--primary); }
+        .step.complete::before { border-color: var(--success); background: var(--success); }
+
+        .step-content h4 { margin: 0; font-size: 16px; }
+        .step-content p { margin: 5px 0 0; font-size: 13px; color: var(--text-muted); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-approved { background: #dcfce7; color: #166534; }
+
+        .back-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 500px) {
+            .status-card { padding: 25px; }
+        }
+    </style>
 </head>
 <body>
 
-<header>
-<h1>🪙 Gayatri Electronic</h1>
-</header>
+    <div class="container">
+        <a href="user.html" class="back-nav">← Return to Dashboard</a>
 
-<div class="container">
-<div class="card">
-<h2>Check Your Loan</h2>
+        <div class="header">
+            <h1>Application Tracker</h1>
+            <p>Real-time updates for your loan request</p>
+        </div>
 
-<input id="phone" placeholder="Phone Number">
-<button onclick="checkStatus()">Check</button>
+        <div class="status-card">
+            <div id="statusContainer">
+                <div class="timeline">
+                    <div class="step complete">
+                        <div class="step-content">
+                            <h4>Application Submitted</h4>
+                            <p>We have received your request and initial documents.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step active">
+                        <div class="step-content">
+                            <h4>Verification in Progress</h4>
+                            <p>Our team is currently reviewing your profile and eligibility.</p>
+                        </div>
+                    </div>
 
-<div id="result"></div>
+                    <div class="step">
+                        <div class="step-content">
+                            <h4>Final Approval</h4>
+                            <p>Wait for the administrator to authorize your loan amount.</p>
+                        </div>
+                    </div>
+                </div>
 
-</div>
-</div>
+                <div style="text-align: center; border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px;">
+                    <span class="status-badge badge-pending" id="currentStatusText">Status: Under Review</span>
+                </div>
+            </div>
+        </div>
 
-<script type="module" src="js/status.js"></script>
+        <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 40px;">
+            Need help? Contact Chudasama Baldevsinh at 9924232759
+        </p>
+    </div>
+
+    <script type="module" src="js/status.js"></script>
+
 </body>
 </html>
