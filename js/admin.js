@@ -20,6 +20,11 @@ import {
 
 let usersData = {};
 
+
+/* ========================= */
+/* 🔒 ADMIN AUTH */
+/* ========================= */
+
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
@@ -38,16 +43,24 @@ onAuthStateChanged(auth, async (user) => {
 
   await loadUsers();
   setupUserHistoryListener();
-  await loadDashboardSummary();
+  await loadDashboardSummary();   // ✅ Now function exists
 });
 
+
+/* ========================= */
+/* 🔹 LOAD USERS */
+/* ========================= */
 
 async function loadUsers() {
 
   const usersSnap = await getDocs(collection(db, "users"));
   const select = document.getElementById("historyUserSelect");
 
+  if (!select) return;
+
   select.innerHTML = `<option value="">Select User</option>`;
+
+  usersData = {};
 
   usersSnap.forEach(docSnap => {
     const data = docSnap.data();
@@ -56,6 +69,44 @@ async function loadUsers() {
   });
 }
 
+
+/* ========================= */
+/* 📊 DASHBOARD SUMMARY */
+/* ========================= */
+
+async function loadDashboardSummary() {
+
+  const usersSnap = await getDocs(collection(db, "users"));
+  const loansSnap = await getDocs(collection(db, "loans"));
+
+  let active = 0;
+  let closed = 0;
+  let outstanding = 0;
+
+  loansSnap.forEach(docSnap => {
+
+    const loan = docSnap.data();
+
+    if (loan.status === "active") {
+      active++;
+      outstanding += loan.remainingAmount || 0;
+    }
+
+    if (loan.status === "closed") {
+      closed++;
+    }
+  });
+
+  document.getElementById("totalUsers").innerText = usersSnap.size;
+  document.getElementById("totalActiveLoans").innerText = active;
+  document.getElementById("totalClosedLoans").innerText = closed;
+  document.getElementById("totalOutstanding").innerText = "₹ " + outstanding;
+}
+
+
+/* ========================= */
+/* 🔹 USER HISTORY */
+/* ========================= */
 
 function setupUserHistoryListener() {
   document.getElementById("historyUserSelect")
@@ -104,15 +155,15 @@ async function handleUserHistoryChange() {
         <td>₹ ${d.principal}</td>
         <td>₹ ${d.totalWithInterest}</td>
         <td>₹ ${d.remainingAmount}</td>
-        <td><span class="status-badge ${d.status}">${d.status}</span></td>
+        <td>${d.status}</td>
         <td>${d.startDate?.toDate?.().toLocaleDateString() || "-"}</td>
         <td>${d.closedDate?.toDate?.().toLocaleDateString() || "-"}</td>
         <td>
-          <button class="btn-primary" onclick="addPayment('${loanId}')">Add Payment</button>
-          <button class="btn-secondary" onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">View Ledger</button>
+          <button onclick="addPayment('${loanId}')">Add Payment</button>
+          <button onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">View Ledger</button>
         </td>
       </tr>
-      <tr id="ledger-${loanId}" class="ledger-row">
+      <tr id="ledger-${loanId}" style="display:none;">
         <td colspan="8"></td>
       </tr>
     `;
@@ -121,6 +172,10 @@ async function handleUserHistoryChange() {
   tableBody.innerHTML = html;
 }
 
+
+/* ========================= */
+/* 🔹 LEDGER */
+/* ========================= */
 
 window.toggleLedger = async function (loanId, totalAmount) {
 
@@ -139,32 +194,29 @@ window.toggleLedger = async function (loanId, totalAmount) {
     const snap = await getDocs(q);
 
     let balance = totalAmount;
-
-    let ledgerHTML = `
-      <div class="ledger-card">
-        <div class="ledger-header">Payment History</div>
-        <div class="ledger-body">
-    `;
+    let ledgerHTML = "";
 
     snap.forEach(docSnap => {
       const entry = docSnap.data();
       balance -= entry.amount;
 
       ledgerHTML += `
-        <div class="ledger-item">
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;">
           <div>${new Date(entry.date).toLocaleDateString()}</div>
-          <div class="ledger-credit">₹ ${entry.amount}</div>
-          <div class="ledger-balance">₹ ${balance < 0 ? 0 : balance}</div>
+          <div style="color:green;">₹ ${entry.amount}</div>
+          <div>₹ ${balance < 0 ? 0 : balance}</div>
         </div>
       `;
     });
 
-    ledgerHTML += `</div></div>`;
-
-    row.innerHTML = `<td colspan="8">${ledgerHTML}</td>`;
+    row.innerHTML = `<td colspan="8">${ledgerHTML || "No payments yet."}</td>`;
   }
 };
 
+
+/* ========================= */
+/* 🔹 ADD PAYMENT */
+/* ========================= */
 
 window.addPayment = async function (loanId) {
 
