@@ -17,7 +17,13 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
+/* ========================= */
+/* 🔹 GLOBAL STATE */
+/* ========================= */
+
 let usersData = {};
+
 
 /* ========================= */
 /* 🔒 ADMIN AUTH PROTECTION */
@@ -41,6 +47,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await loadUsers();
+  setupUserHistoryListener();
   await loadDashboardSummary();
 });
 
@@ -58,8 +65,8 @@ async function loadUsers() {
 
   if (!createLoanSelect || !historySelect) return;
 
-  createLoanSelect.innerHTML = '<option value="">Select User</option>';
-  historySelect.innerHTML = '<option value="">Select User</option>';
+  createLoanSelect.innerHTML = `<option value="">Select User</option>`;
+  historySelect.innerHTML = `<option value="">Select User</option>`;
 
   usersData = {};
 
@@ -81,6 +88,7 @@ async function loadUsers() {
     historySelect.appendChild(option2);
   });
 
+  console.log("Users Loaded:", Object.keys(usersData).length);
 }
 
 
@@ -98,6 +106,7 @@ async function loadDashboardSummary() {
   let totalOutstanding = 0;
 
   loansSnap.forEach(docSnap => {
+
     const loan = docSnap.data();
 
     if (loan.status === "active") {
@@ -121,7 +130,7 @@ async function loadDashboardSummary() {
 /* 🔹 LOGOUT */
 /* ========================= */
 
-window.logout = async function(){
+window.logout = async function () {
   await signOut(auth);
   window.location = "admin-login.html";
 };
@@ -131,34 +140,35 @@ window.logout = async function(){
 /* 🔹 CREATE LOAN */
 /* ========================= */
 
-window.createLoan = async function(){
+window.createLoan = async function () {
 
   const userId = document.getElementById("userId")?.value;
   const principal = parseFloat(document.getElementById("principal")?.value);
   const rate = parseFloat(document.getElementById("interest")?.value);
   const months = parseInt(document.getElementById("months")?.value);
 
-  if(!userId || !principal || !rate || !months){
-    alert("Fill all fields");
+  if (!userId || isNaN(principal) || isNaN(rate) || isNaN(months)) {
+    alert("Fill all fields correctly");
     return;
   }
 
   const interestAmount = (principal * rate * months) / 100;
   const totalWithInterest = principal + interestAmount;
 
-  await addDoc(collection(db,"loans"),{
-      userId,
-      principal,
-      interestRate: rate,
-      months,
-      totalWithoutInterest: principal,
-      totalWithInterest,
-      remainingAmount: totalWithInterest,
-      status: "active",
-      startDate: serverTimestamp()
+  await addDoc(collection(db, "loans"), {
+    userId,
+    principal,
+    interestRate: rate,
+    months,
+    totalWithoutInterest: principal,
+    totalWithInterest,
+    remainingAmount: totalWithInterest,
+    status: "active",
+    startDate: serverTimestamp()
   });
 
   alert("Loan Created Successfully");
+
   await loadDashboardSummary();
 };
 
@@ -167,92 +177,101 @@ window.createLoan = async function(){
 /* 🔹 USER LOAN HISTORY */
 /* ========================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+function setupUserHistoryListener() {
 
   const historySelect = document.getElementById("historyUserSelect");
-
   if (!historySelect) return;
 
-  historySelect.addEventListener("change", async function(){
+  historySelect.addEventListener("change", handleUserHistoryChange);
+}
 
-    const userId = this.value;
-    const userInfoDiv = document.getElementById("selectedUserInfo");
-    const tableBody = document.querySelector("#loanHistoryTable tbody");
 
-    if(!userId){
-      tableBody.innerHTML = `<tr><td colspan="9">Select a user.</td></tr>`;
-      userInfoDiv.innerHTML = "";
-      return;
-    }
+async function handleUserHistoryChange() {
 
-    const user = usersData[userId];
+  const userId = this.value;
 
-    userInfoDiv.innerHTML = `
-      <strong>Name:</strong> ${user?.name || "-"} <br>
-      <strong>Phone:</strong> ${user?.phone || "-"} <br>
-      <strong>Address:</strong> ${user?.address || "-"}
+  const userInfoDiv = document.getElementById("selectedUserInfo");
+  const tableBody = document.querySelector("#loanHistoryTable tbody");
+
+  if (!tableBody || !userInfoDiv) return;
+
+  if (!userId) {
+    tableBody.innerHTML = `<tr><td colspan="9">Select a user.</td></tr>`;
+    userInfoDiv.innerHTML = "";
+    return;
+  }
+
+  const user = usersData[userId];
+
+  userInfoDiv.innerHTML = `
+    <strong>Name:</strong> ${user?.name || "-"} <br>
+    <strong>Phone:</strong> ${user?.phone || "-"} <br>
+    <strong>Address:</strong> ${user?.address || "-"}
+  `;
+
+  const q = query(collection(db, "loans"), where("userId", "==", userId));
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    tableBody.innerHTML = `<tr><td colspan="9">No loans found.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+
+  snap.forEach(docSnap => {
+
+    const d = docSnap.data();
+    const loanId = docSnap.id;
+
+    const startDate = d.startDate?.toDate
+      ? d.startDate.toDate().toLocaleString()
+      : "-";
+
+    const closedDate = d.closedDate?.toDate
+      ? d.closedDate.toDate().toLocaleString()
+      : "-";
+
+    const actionBtn = d.status === "active"
+      ? `<button onclick="addPayment('${loanId}')">Add Payment</button>`
+      : "-";
+
+    html += `
+      <tr>
+        <td>${loanId}</td>
+        <td>₹ ${d.principal}</td>
+        <td>₹ ${d.totalWithInterest}</td>
+        <td>₹ ${d.remainingAmount}</td>
+        <td class="status-${d.status}">${d.status}</td>
+        <td>${startDate}</td>
+        <td>${closedDate}</td>
+        <td>-</td>
+        <td>${actionBtn}</td>
+      </tr>
     `;
-
-    const q = query(collection(db,"loans"), where("userId","==",userId));
-    const snap = await getDocs(q);
-
-    if(snap.empty){
-      tableBody.innerHTML = `<tr><td colspan="9">No loans found.</td></tr>`;
-      return;
-    }
-
-    let html = "";
-
-    for (const docSnap of snap.docs) {
-
-      const d = docSnap.data();
-      const loanId = docSnap.id;
-
-      const startDate = d.startDate?.toDate ? d.startDate.toDate().toLocaleString() : "-";
-      const closedDate = d.closedDate?.toDate ? d.closedDate.toDate().toLocaleString() : "-";
-
-      let actionBtn = d.status === "active"
-        ? `<button onclick="addPayment('${loanId}')">Add Payment</button>`
-        : "-";
-
-      html += `
-        <tr>
-          <td>${loanId}</td>
-          <td>₹ ${d.principal}</td>
-          <td>₹ ${d.totalWithInterest}</td>
-          <td>₹ ${d.remainingAmount}</td>
-          <td class="status-${d.status}">${d.status}</td>
-          <td>${startDate}</td>
-          <td>${closedDate}</td>
-          <td>-</td>
-          <td>${actionBtn}</td>
-        </tr>
-      `;
-    }
-
-    tableBody.innerHTML = html;
-
   });
 
-});
+  tableBody.innerHTML = html;
+}
 
 
 /* ========================= */
 /* 🔹 ADD PAYMENT */
 /* ========================= */
 
-window.addPayment = async function(loanId){
+window.addPayment = async function (loanId) {
 
   const amount = prompt("Enter Payment Amount:");
   if (!amount) return;
 
   const paymentAmount = parseFloat(amount);
-  if (isNaN(paymentAmount)) {
+
+  if (isNaN(paymentAmount) || paymentAmount <= 0) {
     alert("Invalid amount");
     return;
   }
 
-  const loanRef = doc(db,"loans",loanId);
+  const loanRef = doc(db, "loans", loanId);
   const loanSnap = await getDoc(loanRef);
 
   if (!loanSnap.exists()) {
@@ -263,27 +282,33 @@ window.addPayment = async function(loanId){
   let remaining = loanSnap.data().remainingAmount;
   remaining -= paymentAmount;
 
-  await addDoc(collection(db,"ledger"),{
-      loanId,
-      userId: loanSnap.data().userId,
-      type: "credit",
-      amount: paymentAmount,
-      date: new Date().toISOString()
+  await addDoc(collection(db, "ledger"), {
+    loanId,
+    userId: loanSnap.data().userId,
+    type: "credit",
+    amount: paymentAmount,
+    date: new Date().toISOString()
   });
 
   if (remaining <= 0) {
-      remaining = 0;
-      await updateDoc(loanRef,{
-        remainingAmount: 0,
-        status: "closed",
-        closedDate: serverTimestamp()
-      });
-      alert("Loan Fully Paid");
+
+    remaining = 0;
+
+    await updateDoc(loanRef, {
+      remainingAmount: 0,
+      status: "closed",
+      closedDate: serverTimestamp()
+    });
+
+    alert("Loan Fully Paid");
+
   } else {
-      await updateDoc(loanRef,{
-        remainingAmount: remaining
-      });
-      alert("Payment Recorded");
+
+    await updateDoc(loanRef, {
+      remainingAmount: remaining
+    });
+
+    alert("Payment Recorded");
   }
 
   document.getElementById("historyUserSelect")
