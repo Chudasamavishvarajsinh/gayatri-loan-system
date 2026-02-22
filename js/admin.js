@@ -17,13 +17,11 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let usersData = {};
+
 let currentLoanId = null;
 
 
-/* ========================= */
-/* 🔐 ADMIN AUTH PROTECTION */
-/* ========================= */
+/* ================= ADMIN AUTH ================= */
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -32,8 +30,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const adminRef = doc(db, "admins", user.uid);
-  const adminSnap = await getDoc(adminRef);
+  const adminSnap = await getDoc(doc(db, "admins", user.uid));
 
   if (!adminSnap.exists()) {
     await signOut(auth);
@@ -42,18 +39,19 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await loadUsers();
-  setupHistoryListener();
   await loadDashboardSummary();
+
+  document
+    .getElementById("historyUserSelect")
+    ?.addEventListener("change", loadUserLoans);
 });
 
 
-/* ========================= */
-/* 🔹 LOAD USERS */
-/* ========================= */
+/* ================= LOAD USERS ================= */
 
 async function loadUsers() {
 
-  const snap = await getDocs(collection(db, "users"));
+  const usersSnapshot = await getDocs(collection(db, "users"));
 
   const createSelect = document.getElementById("userId");
   const historySelect = document.getElementById("historyUserSelect");
@@ -63,26 +61,24 @@ async function loadUsers() {
   createSelect.innerHTML = `<option value="">Select User</option>`;
   historySelect.innerHTML = `<option value="">Select User</option>`;
 
-  usersData = {};
+  usersSnapshot.forEach(docSnap => {
 
-  snap.forEach(docSnap => {
+    const data = docSnap.data();
 
-    usersData[docSnap.id] = docSnap.data();
+    const option1 = document.createElement("option");
+    option1.value = docSnap.id;
+    option1.textContent = data.name || "No Name";
+    createSelect.appendChild(option1);
 
-    createSelect.appendChild(
-      new Option(docSnap.data().name, docSnap.id)
-    );
-
-    historySelect.appendChild(
-      new Option(docSnap.data().name, docSnap.id)
-    );
+    const option2 = document.createElement("option");
+    option2.value = docSnap.id;
+    option2.textContent = data.name || "No Name";
+    historySelect.appendChild(option2);
   });
 }
 
 
-/* ========================= */
-/* 📊 DASHBOARD SUMMARY */
-/* ========================= */
+/* ================= DASHBOARD ================= */
 
 async function loadDashboardSummary() {
 
@@ -114,9 +110,7 @@ async function loadDashboardSummary() {
 }
 
 
-/* ========================= */
-/* 🏦 CREATE LOAN */
-/* ========================= */
+/* ================= CREATE LOAN ================= */
 
 window.createLoan = async function () {
 
@@ -130,8 +124,8 @@ window.createLoan = async function () {
     return;
   }
 
-  const interestAmount = (principal * rate * months) / 100;
-  const totalWithInterest = principal + interestAmount;
+  const interest = (principal * rate * months) / 100;
+  const total = principal + interest;
 
   await addDoc(collection(db, "loans"), {
     userId,
@@ -139,8 +133,8 @@ window.createLoan = async function () {
     interestRate: rate,
     months,
     totalWithoutInterest: principal,
-    totalWithInterest,
-    remainingAmount: totalWithInterest,
+    totalWithInterest: total,
+    remainingAmount: total,
     status: "active",
     startDate: serverTimestamp()
   });
@@ -155,17 +149,9 @@ window.createLoan = async function () {
 };
 
 
-/* ========================= */
-/* 📂 USER LOAN HISTORY */
-/* ========================= */
+/* ================= LOAD USER LOANS ================= */
 
-function setupHistoryListener() {
-  document.getElementById("historyUserSelect")
-    ?.addEventListener("change", handleUserHistory);
-}
-
-
-async function handleUserHistory() {
+async function loadUserLoans() {
 
   const userId = this.value;
   const tbody = document.querySelector("#loanHistoryTable tbody");
@@ -191,19 +177,15 @@ async function handleUserHistory() {
     const loanId = docSnap.id;
 
     html += `
-      <tr class="${d.status === "closed" ? "loan-closed" : "loan-active"}">
+      <tr>
         <td>${loanId}</td>
         <td>₹ ${d.principal}</td>
         <td>₹ ${d.totalWithInterest}</td>
         <td>₹ ${d.remainingAmount}</td>
-        <td><span class="status ${d.status}">${d.status}</span></td>
+        <td>${d.status}</td>
         <td>
-          <button class="btn-add" onclick="openPaymentModal('${loanId}')">Add Payment</button>
-          <button class="btn-ledger" onclick="toggleLedger('${loanId}', ${d.totalWithInterest})">Ledger</button>
+          <button onclick="openPaymentModal('${loanId}')">Add Payment</button>
         </td>
-      </tr>
-      <tr id="ledger-${loanId}" class="ledger-row">
-        <td colspan="6"></td>
       </tr>
     `;
   });
@@ -212,9 +194,7 @@ async function handleUserHistory() {
 }
 
 
-/* ========================= */
-/* 💳 PAYMENT MODAL */
-/* ========================= */
+/* ================= PAYMENT ================= */
 
 window.openPaymentModal = function (loanId) {
   currentLoanId = loanId;
@@ -225,7 +205,6 @@ window.closePaymentModal = function () {
   document.getElementById("paymentAmountInput").value = "";
   document.getElementById("paymentModal").style.display = "none";
 };
-
 
 window.submitPayment = async function () {
 
@@ -241,8 +220,6 @@ window.submitPayment = async function () {
   const loanRef = doc(db, "loans", currentLoanId);
   const loanSnap = await getDoc(loanRef);
 
-  if (!loanSnap.exists()) return;
-
   let remaining = loanSnap.data().remainingAmount - amount;
 
   await addDoc(collection(db, "ledger"), {
@@ -250,90 +227,25 @@ window.submitPayment = async function () {
     userId: loanSnap.data().userId,
     type: "credit",
     amount: amount,
-    createdAt: serverTimestamp(),
-    date: new Date().toISOString(),
     dateString: new Date().toLocaleString()
   });
 
   await updateDoc(loanRef, {
     remainingAmount: remaining <= 0 ? 0 : remaining,
-    status: remaining <= 0 ? "closed" : "active",
-    closedDate: remaining <= 0 ? serverTimestamp() : null
+    status: remaining <= 0 ? "closed" : "active"
   });
 
   closePaymentModal();
 
-  document.getElementById("historyUserSelect")
+  document
+    .getElementById("historyUserSelect")
     ?.dispatchEvent(new Event("change"));
 
   await loadDashboardSummary();
 };
 
 
-/* ========================= */
-/* 📒 LEDGER */
-/* ========================= */
-
-window.toggleLedger = async function (loanId, totalAmount) {
-
-  const row = document.getElementById(`ledger-${loanId}`);
-  const isOpen = row.style.display === "table-row";
-  row.style.display = isOpen ? "none" : "table-row";
-
-  if (!isOpen) {
-
-    const q = query(collection(db, "ledger"), where("loanId", "==", loanId));
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-      row.innerHTML = `<td colspan="6">No payments yet</td>`;
-      return;
-    }
-
-    let entries = [];
-    snap.forEach(docSnap => entries.push(docSnap.data()));
-
-    entries.sort((a, b) => {
-      const dateA = a.date ? new Date(a.date) : new Date();
-      const dateB = b.date ? new Date(b.date) : new Date();
-      return dateA - dateB;
-    });
-
-    let balance = totalAmount;
-
-    let html = `
-      <div class="ledger-card">
-        <div class="ledger-header">Payment History</div>
-        <div class="ledger-body">
-    `;
-
-    entries.forEach(entry => {
-
-      balance -= entry.amount;
-
-      const dateTime =
-        entry.dateString ||
-        (entry.date ? new Date(entry.date).toLocaleString() : "-");
-
-      html += `
-        <div class="ledger-item">
-          <div>${dateTime}</div>
-          <div class="credit">₹ ${entry.amount}</div>
-          <div class="balance">₹ ${balance < 0 ? 0 : balance}</div>
-        </div>
-      `;
-    });
-
-    html += `</div></div>`;
-
-    row.innerHTML = `<td colspan="6">${html}</td>`;
-  }
-};
-
-
-/* ========================= */
-/* 🔓 LOGOUT */
-/* ========================= */
+/* ================= LOGOUT ================= */
 
 window.logout = async function () {
   await signOut(auth);
