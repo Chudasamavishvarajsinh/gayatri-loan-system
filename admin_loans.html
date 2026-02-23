@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Loan | Gayatri Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb; --secondary: #64748b; --dark: #0f172a; --light: #f8fafc;
+            --white: #ffffff; --border: #e2e8f0; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { margin: 0; background-color: var(--light); color: var(--dark); display: flex; min-height: 100vh; }
+
+        /* SIDEBAR (Consistent) */
+        .sidebar {
+            width: 280px; background: var(--dark); color: var(--white); padding: 30px;
+            display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100;
+        }
+        .sidebar h2 { font-size: 24px; color: var(--primary); margin: 0; font-weight: 800; }
+        .sidebar p.owner { font-size: 12px; color: #94a3b8; margin-bottom: 40px; text-transform: uppercase; }
+        .nav-link {
+            display: block; padding: 12px 15px; color: #cbd5e1; text-decoration: none;
+            border-radius: 12px; margin-bottom: 8px; font-weight: 500;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+        .nav-link.active { background: var(--primary); color: var(--white); }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .header { margin-bottom: 30px; }
+        
+        .card {
+            background: var(--white); padding: 30px; border-radius: 24px;
+            border: 1px solid var(--border); box-shadow: var(--shadow); max-width: 600px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; border: 1px solid var(--border);
+            border-radius: 10px; font-size: 15px; background: #fcfdfe;
+        }
+
+        .calc-preview {
+            background: #f1f5f9; padding: 20px; border-radius: 15px; margin-top: 20px;
+            border: 1px dashed #cbd5e1;
+        }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .total-row { border-top: 1px solid #cbd5e1; margin-top: 10px; padding-top: 10px; font-weight: 700; color: var(--primary); }
+
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--primary); color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+            cursor: pointer; margin-top: 20px; transition: 0.2s;
+        }
+        .btn-submit:hover { background: #1d4ed8; }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 80px; padding: 15px; }
+            .sidebar h2, .sidebar p, .nav-link span { display: none; }
+            .main-content { margin-left: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>GAYATRI</h2>
+        <p class="owner">Admin: Baldevsinh</p>
+        <nav class="nav-menu">
+            <a href="admin_dashboard.html" class="nav-link"><span>Dashboard Summary</span></a>
+            <a href="admin_users.html" class="nav-link"><span>Manage Customers</span></a>
+            <a href="admin_loans.html" class="nav-link active"><span>Loan Management</span></a>
+            <a href="admin_ledger.html" class="nav-link"><span>Global Ledger</span></a>
+        </nav>
+        <div style="margin-top: auto; font-size: 11px; color: #64748b;">
+            Gayatri Electronics<br>+91 9924232759
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <h1>Create New Loan</h1>
+            <p style="color: var(--secondary);">Issue a new credit record for a registered customer.</p>
+        </div>
+
+        <div class="card">
+            <form id="loanForm">
+                <div class="form-group">
+                    <label>Select Customer</label>
+                    <select id="userSelect" required>
+                        <option value="">-- Choose a Customer --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Principal Amount (₹)</label>
+                    <input type="number" id="principal" placeholder="e.g. 50000" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" step="0.01" id="rate" placeholder="e.g. 2" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (Months)</label>
+                        <input type="number" id="months" placeholder="e.g. 12" required>
+                    </div>
+                </div>
+
+                <div class="calc-preview">
+                    <div class="calc-row"><span>Principal:</span> <span id="view-principal">₹0</span></div>
+                    <div class="calc-row"><span>Interest:</span> <span id="view-interest">₹0</span></div>
+                    <div class="calc-row total-row"><span>Total Payable:</span> <span id="view-total">₹0</span></div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Create & Save Loan</button>
+            </form>
+        </div>
+    </main>
+
+    <script type="module" src="js/admin-loans.js"></script>
+</body>
+</html>
