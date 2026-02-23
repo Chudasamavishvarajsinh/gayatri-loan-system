@@ -1,80 +1,80 @@
 import { auth, db } from "./firebase-config.js";
+import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-import { 
-    createUserWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const loanListContainer = document.getElementById("loanListContainer");
 
-import { 
-    doc,
-    setDoc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-/* 🔒 Protect Dashboard */
+/**
+ * Main dashboard logic for authenticated users
+ * Follows the "User Panel" responsibilities: viewing personal loans and status.
+ */
 onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location = "admin-login.html";
-        return;
-    }
+    if (user) {
+        try {
+            // Safety check to ensure the database is initialized
+            if (!db) throw new Error("Database not found");
 
-    const adminDoc = await getDoc(doc(db, "admins", user.uid));
+            // Query loans collection where 'userId' matches current authenticated user.
+            const q = query(collection(db, "loans"), where("userId", "==", user.uid));
+            const snapshot = await getDocs(q);
+            
+            loanListContainer.innerHTML = "";
 
-    if (!adminDoc.exists()) {
-        alert("Access Denied");
-        await signOut(auth);
-        window.location = "admin-login.html";
+            if (snapshot.empty) {
+                loanListContainer.innerHTML = `
+                    <p style="text-align:center; padding:20px; color:#64748b;">
+                        No active loan records found.
+                    </p>`;
+                return;
+            }
+
+            // Loop through each loan document found for this user
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const div = document.createElement("div");
+                div.className = "loan-item";
+
+                // Map data to the fields defined in your DATABASE STRUCTURE:
+                // - principal
+                // - remainingAmount
+                // - status
+                // - totalWithInterest
+                div.innerHTML = `
+                    <div class="loan-info">
+                        <h4>Principal: ₹${data.principal || 0}</h4>
+                        <p>
+                            Outstanding: <strong>₹${data.remainingAmount ?? 0}</strong> | 
+                            Total Payable: ₹${data.totalWithInterest || 'N/A'}
+                        </p>
+                        <p style="font-size:11px; margin-top:5px;">Interest Rate: ${data.interestRate}%</p>
+                    </div>
+                    <div class="status-badge ${data.status === 'active' ? 'status-active' : 'status-closed'}">
+                        ${(data.status || 'active').toUpperCase()}
+                    </div>
+                `;
+                loanListContainer.appendChild(div);
+            });
+
+        } catch (error) {
+            console.error("Dashboard Error:", error);
+            loanListContainer.innerHTML = `
+                <div style="text-align:center; color:#e11d48; padding:20px;">
+                    <p><strong>Database Error</strong></p>
+                    <p style="font-size:12px;">${error.message}</p>
+                </div>`;
+        }
+    } else {
+        // Force redirect to login if session is invalid 
+        window.location.href = "index.html";
     }
 });
 
-
-/* Toggle Create Admin Section */
-window.toggleCreateAdmin = function() {
-    const section = document.getElementById("createAdminSection");
-    section.style.display = section.style.display === "none" ? "block" : "none";
-};
-
-
-/* Create New Admin */
-window.createAdmin = async function() {
-
-    const currentAdmin = auth.currentUser;
-
-    const email = document.getElementById("newAdminEmail").value;
-    const password = document.getElementById("newAdminPassword").value;
-
-    if (!email || !password) {
-        alert("Please fill all fields");
-        return;
-    }
-
-    try {
-        const userCred = await createUserWithEmailAndPassword(auth, email, password);
-
-        await setDoc(doc(db, "admins", userCred.user.uid), {
-            email: email,
-            role: "admin",
-            createdAt: new Date()
+// Logout handling 
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        signOut(auth).then(() => {
+            window.location.href = "index.html";
         });
-
-        alert("New Admin Created Successfully");
-
-        // Keep original admin logged in
-        await auth.updateCurrentUser(currentAdmin);
-
-        document.getElementById("newAdminEmail").value = "";
-        document.getElementById("newAdminPassword").value = "";
-
-    } catch (error) {
-        alert(error.message);
-    }
-};
-
-
-/* Logout */
-window.logout = async function() {
-    await signOut(auth);
-    window.location = "admin-login.html";
-};
+    });
+}
