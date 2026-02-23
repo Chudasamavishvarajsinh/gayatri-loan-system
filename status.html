@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Application | Gayatri Electronics</title>
+    <title>Application Status | Gayatri Electronics</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
-            --success: #10b981;
-            --pending: #f59e0b;
+            --secondary: #64748b;
             --dark: #0f172a;
             --light: #f8fafc;
             --white: #ffffff;
             --border: #e2e8f0;
-            --text-muted: #64748b;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -23,148 +22,122 @@
             margin: 0;
             background-color: var(--light);
             color: var(--dark);
-            padding: 20px;
+            display: flex;
+            min-height: 100vh;
         }
 
-        .container {
-            max-width: 700px;
-            margin: 50px auto;
+        /* SIDEBAR (Matches user.html) */
+        .sidebar {
+            width: 280px;
+            background: var(--dark);
+            color: var(--white);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
+        .sidebar h2 { font-size: 22px; color: var(--primary); margin: 0; }
+        .sidebar p.brand-sub { font-size: 13px; color: #94a3b8; margin-bottom: 40px; }
+
+        .nav-menu { flex: 1; }
+        .nav-item {
+            display: block;
+            padding: 12px 15px;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--white); }
+
+        /* MAIN CONTENT */
+        .main-container {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
         }
 
-        .header h1 { font-size: 28px; margin: 0; }
-        .header p { color: var(--text-muted); margin-top: 8px; }
+        .header-bar { margin-bottom: 40px; }
+        .header-bar h1 { font-size: 28px; margin: 0; }
 
-        /* TRACKING CARD */
         .status-card {
             background: var(--white);
-            border-radius: 24px;
             padding: 40px;
+            border-radius: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        /* TIMELINE DESIGN */
-        .timeline {
-            position: relative;
-            margin: 20px 0;
-            padding-left: 40px;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: var(--border);
-        }
-
-        .step {
-            position: relative;
-            margin-bottom: 35px;
-        }
-
-        .step::before {
-            content: '';
-            position: absolute;
-            left: -33px;
-            top: 5px;
-            width: 18px;
-            height: 18px;
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            background: #dcfce7;
+            color: #166534;
             border-radius: 50%;
-            background: var(--white);
-            border: 3px solid var(--border);
-            z-index: 1;
-        }
-
-        /* Active/Complete Step Styling */
-        .step.active::before { border-color: var(--primary); background: var(--primary); }
-        .step.complete::before { border-color: var(--success); background: var(--success); }
-
-        .step-content h4 { margin: 0; font-size: 16px; }
-        .step-content p { margin: 5px 0 0; font-size: 13px; color: var(--text-muted); }
-
-        .status-badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-top: 20px;
-        }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-approved { background: #dcfce7; color: #166534; }
-
-        .back-nav {
             display: flex;
             align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 25px;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 20px;
         }
 
-        @media (max-width: 500px) {
-            .status-card { padding: 25px; }
+        #currentStatusText {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--primary);
+        }
+
+        .status-note {
+            color: var(--secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 80px; padding: 15px; }
+            .sidebar h2, .sidebar p.brand-sub, .nav-item span { display: none; }
+            .main-container { margin-left: 80px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <a href="user.html" class="back-nav">← Return to Dashboard</a>
+    <aside class="sidebar">
+        <h2>Gayatri</h2>
+        <p class="brand-sub">Electronic Services</p>
+        <nav class="nav-menu">
+            <a href="user.html" class="nav-item"><span>My Dashboard</span></a>
+            <a href="history.html" class="nav-item"><span>Payment History</span></a>
+            <a href="status.html" class="nav-item active"><span>Track Status</span></a>
+        </nav>
+        <div class="nav-item" style="color: #f87171; cursor: pointer; margin-top: auto;" id="logoutBtn">
+            <span>Logout</span>
+        </div>
+    </aside>
 
-        <div class="header">
-            <h1>Application Tracker</h1>
-            <p>Real-time updates for your loan request</p>
+    <main class="main-container">
+        <div class="header-bar">
+            <h1>Account Status</h1>
         </div>
 
         <div class="status-card">
-            <div id="statusContainer">
-                <div class="timeline">
-                    <div class="step complete">
-                        <div class="step-content">
-                            <h4>Application Submitted</h4>
-                            <p>We have received your request and initial documents.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="step active">
-                        <div class="step-content">
-                            <h4>Verification in Progress</h4>
-                            <p>Our team is currently reviewing your profile and eligibility.</p>
-                        </div>
-                    </div>
-
-                    <div class="step">
-                        <div class="step-content">
-                            <h4>Final Approval</h4>
-                            <p>Wait for the administrator to authorize your loan amount.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align: center; border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px;">
-                    <span class="status-badge badge-pending" id="currentStatusText">Status: Under Review</span>
-                </div>
-            </div>
+            <div class="status-icon">✓</div>
+            <h3>Account Verfication</h3>
+            <div id="currentStatusText">Checking Status...</div>
+            <p class="status-note" id="statusNote">
+                Please wait while we fetch your latest account updates from our servers.
+            </p>
         </div>
-
-        <p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 40px;">
-            Need help? Contact Chudasama Baldevsinh at 9924232759
-        </p>
-    </div>
+    </main>
 
     <script type="module" src="js/status.js"></script>
-
+    <script type="module" src="js/user-dashboard.js"></script>
 </body>
 </html>
