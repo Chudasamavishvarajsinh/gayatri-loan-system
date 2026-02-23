@@ -26,7 +26,7 @@
             min-height: 100vh;
         }
 
-        /* SIDEBAR */
+        /* SIDEBAR - As per System Flow */
         .sidebar {
             width: 280px;
             background: var(--dark);
@@ -62,10 +62,7 @@
             padding: 40px;
         }
 
-        .header-bar {
-            margin-bottom: 40px;
-        }
-
+        .header-bar { margin-bottom: 40px; }
         .header-bar h1 { font-size: 28px; margin: 0; color: var(--dark); }
         .header-bar p { color: var(--secondary); margin: 5px 0 0; }
 
@@ -81,7 +78,7 @@
         .card-header { border-bottom: 1px solid var(--border); margin-bottom: 20px; padding-bottom: 10px; }
         .card-header h3 { margin: 0; font-size: 18px; color: var(--dark); }
 
-        /* LOAN LIST STYLING */
+        /* LOAN LIST STYLING - Matches Doc Logic */
         #loanListContainer { margin-top: 10px; }
         .loan-item {
             display: flex;
@@ -103,9 +100,9 @@
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            background: #dcfce7;
-            color: #166534;
         }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-closed { background: #fee2e2; color: #991b1b; }
 
         @media (max-width: 1024px) {
             .sidebar { width: 80px; padding: 15px; text-align: center; }
@@ -139,10 +136,10 @@
 
         <div class="card">
             <div class="card-header">
-                <h3>Current Active Loans</h3>
+                <h3>Current Loans</h3>
             </div>
             <div id="loanListContainer">
-                <p style="text-align: center; color: var(--secondary); padding: 20px;">Fetching your records...</p>
+                <p style="text-align: center; color: var(--secondary); padding: 20px;">Fetching your records from Firestore...</p>
             </div>
         </div>
 
@@ -150,10 +147,10 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h3 style="margin:0; color: var(--primary);">Official Support</h3>
-                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">For any queries regarding your ledger, contact us.</p>
+                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">For queries regarding your ledger, contact Chudasama Baldevsinh.</p>
                 </div>
                 <div style="text-align: right;">
-                    <p style="margin:0; font-weight: 700;">Chudasama Baldevsinh</p>
+                    <p style="margin:0; font-weight: 700;">Admin Support</p>
                     <p style="margin:5px 0 0; color: var(--primary); font-size: 18px;">+91 9924232759</p>
                 </div>
             </div>
