@@ -1,61 +1,65 @@
 import { auth, db } from "./firebase-config.js";
-import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const loanListContainer = document.getElementById("loanListContainer");
+// UI Elements
+const userNameDisplay = document.getElementById("userName");
+const userRemaining = document.getElementById("userRemaining");
+const userPrincipal = document.getElementById("userPrincipal");
+const userPaid = document.getElementById("userPaid");
+const logoutBtn = document.getElementById("logoutBtn");
 
-// Check if user is logged in
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        try {
-            // Safety check for DB initialization
-            if (!db) throw new Error("Database not found");
-
-            // Query only loans belonging to this user
-            const q = query(collection(db, "loans"), where("userId", "==", user.uid));
-            const snapshot = await getDocs(q);
-            
-            loanListContainer.innerHTML = "";
-
-            if (snapshot.empty) {
-                loanListContainer.innerHTML = `<p style="text-align:center; padding:20px; color:#64748b;">No active loans found for your account.</p>`;
-                return;
-            }
-
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const div = document.createElement("div");
-                div.className = "loan-item";
-                div.innerHTML = `
-                    <div>
-                        <h4 style="margin:0;">Principal: ₹${data.principal || 0}</h4>
-                        <p style="margin:5px 0 0; font-size:13px; color:#64748b;">
-                            Interest: ${data.interest || 0}% | Balance: ₹${data.remaining ?? (data.totalPayable || '0')}
-                        </p>
-                    </div>
-                    <div class="status-badge" style="background:#dcfce7; color:#166534; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:700;">
-                        ${data.status || 'ACTIVE'}
-                    </div>
-                `;
-                loanListContainer.appendChild(div);
-            });
-
-        } catch (error) {
-            console.error("Database Error:", error);
-            loanListContainer.innerHTML = `<p style="color:#e11d48; text-align:center; padding:20px;">Connection Error: ${error.message}</p>`;
+/**
+ * Fetches the logged-in user's profile and active loan details
+ */
+async function loadUserData(user) {
+    try {
+        // 1. Fetch User Profile for the Welcome Name
+        const userSnap = await getDoc(doc(db, "users", user.uid));
+        if (userSnap.exists()) {
+            userNameDisplay.innerText = `Welcome, ${userSnap.data().name}!`;
         }
+
+        // 2. Fetch Active Loan associated with this User UID
+        const q = query(collection(db, "loans"), where("userId", "==", user.uid), where("status", "==", "active"));
+        const loanSnap = await getDocs(q);
+
+        if (!loanSnap.empty) {
+            const loanData = loanSnap.docs[0].data();
+            
+            // Calculate totals
+            const remaining = loanData.remainingAmount || 0;
+            const totalWithInterest = loanData.totalWithInterest || 0;
+            const paidSoFar = totalWithInterest - remaining;
+
+            // Update UI
+            userRemaining.innerText = `₹${remaining.toLocaleString('en-IN')}`;
+            userPrincipal.innerText = `₹${loanData.principal.toLocaleString('en-IN')}`;
+            userPaid.innerText = `₹${paidSoFar.toLocaleString('en-IN')}`;
+        } else {
+            // No active loan found
+            userRemaining.innerText = "₹0";
+            document.getElementById("loanStatusBadge").innerText = "NO ACTIVE LOAN";
+            document.getElementById("loanStatusBadge").style.color = "#64748b";
+        }
+    } catch (error) {
+        console.error("Error loading user data:", error);
+    }
+}
+
+// Authentication Check
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loadUserData(user);
     } else {
-        // Redirect to login if session is expired
+        // Not logged in, redirect to login page
         window.location.href = "index.html";
     }
 });
 
 // Logout Handling
-const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-        signOut(auth).then(() => {
-            window.location.href = "index.html";
-        });
+logoutBtn.addEventListener("click", () => {
+    signOut(auth).then(() => {
+        window.location.href = "index.html";
     });
-}
+});
