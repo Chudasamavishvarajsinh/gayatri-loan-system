@@ -1,33 +1,54 @@
-import { auth } from "./firebase-config.js";
-import {
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { auth, db } from "./firebase-config.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-window.register = function() {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+const loginForm = document.getElementById("loginForm");
+const loginBtn = document.getElementById("loginBtn");
+const errorBox = document.getElementById("errorBox");
 
-if(password.length < 6){
-alert("Password must be at least 6 characters");
-return;
-}
+loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-createUserWithEmailAndPassword(auth, email, password)
-.then(() => {
-alert("Registration successful!");
-window.location.href="index.html";
-})
-.catch(err => alert(err.message));
-}
+    // Reset UI state
+    loginBtn.innerText = "Verifying Credentials...";
+    loginBtn.disabled = true;
+    errorBox.style.display = "none";
 
+    try {
+        // 1. Firebase Auth Sign-In
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-window.login = function() {
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+        // 2. Role-Based Redirection Logic (Admin vs User)
+        // We look for the user's UID in the 'admins' collection
+        const adminDocRef = doc(db, "admins", user.uid);
+        const adminDocSnap = await getDoc(adminDocRef);
 
-signInWithEmailAndPassword(auth, email, password)
-.then(() => window.location.href="user.html")
-.catch(err => alert(err.message));
-}
+        if (adminDocSnap.exists()) {
+            // Logged in as: Chudasama Baldevsinh (Admin)
+            window.location.href = "admin_dashboard.html";
+        } else {
+            // Logged in as: Customer
+            window.location.href = "user.html";
+        }
 
+    } catch (error) {
+        console.error("Auth Error:", error.code);
+        errorBox.style.display = "block";
+        
+        // Friendly error messages
+        if (error.code === 'auth/invalid-credential') {
+            errorBox.innerText = "Incorrect email or password. Please try again.";
+        } else if (error.code === 'auth/user-not-found') {
+            errorBox.innerText = "No account found with this email.";
+        } else {
+            errorBox.innerText = "Login failed: " + error.message;
+        }
+
+        loginBtn.innerText = "Secure Sign In";
+        loginBtn.disabled = false;
+    }
+});
