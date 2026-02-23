@@ -1,60 +1,47 @@
 import { auth, db } from "./firebase-config.js";
 import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-async function loadUserDashboard() {
-    const loanContainer = document.getElementById("loans");
-    
-    auth.onAuthStateChanged(async (user) => {
-        if (user) {
-            try {
-                // Fetch only loans matching the logged-in user's UID
-                const q = query(collection(db, "loans"), where("userId", "==", user.uid));
-                const snapshot = await getDocs(q);
-                
-                loanContainer.innerHTML = "";
-                
-                if (snapshot.empty) {
-                    loanContainer.innerHTML = "<p style='text-align:center; padding: 20px;'>No active loans found.</p>";
-                    return;
-                }
+const loanList = document.getElementById("loanListContainer");
 
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const loanItem = document.createElement("div");
-                    loanItem.className = "loan-item";
-                    
-                    // Display principal amount and remaining balance if available [cite: 70, 71]
-                    loanItem.innerHTML = `
-                        <div class="loan-info">
-                            <h4>Loan Amount: ₹${data.principal || 0}</h4>
-                            <p>Remaining: ₹${data.remaining !== undefined ? data.remaining : (data.totalPayable || 'N/A')}</p>
-                        </div>
-                        <div class="status-badge status-active">
-                            ${data.status || 'Active'}
-                        </div>
-                    `;
-                    loanContainer.appendChild(loanItem);
-                });
-            } catch (error) {
-                console.error("Error loading loans:", error);
-                loanContainer.innerHTML = "<p style='text-align:center; color:red;'>Error loading data.</p>";
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        try {
+            // Only fetch loans where userId matches the logged-in user
+            const q = query(collection(db, "loans"), where("userId", "==", user.uid));
+            const snapshot = await getDocs(q);
+            
+            loanList.innerHTML = "";
+            
+            if (snapshot.empty) {
+                loanList.innerHTML = "<p style='text-align:center; padding:20px;'>No active loans found in your records.</p>";
+                return;
             }
-        } else {
-            // Redirect to login if not authenticated [cite: 11]
-            window.location.href = "index.html";
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const div = document.createElement("div");
+                div.className = "loan-item";
+                div.innerHTML = `
+                    <div>
+                        <h4 style="margin:0;">Loan Amount: ₹${data.principal || 0} [cite: 71]</h4>
+                        <p style="margin:5px 0 0; font-size:13px; color:#64748b;">
+                            Interest: ${data.interest || 0}% | Duration: ${data.months || 0} Mo. [cite: 72, 73]
+                        </p>
+                    </div>
+                    <div class="status-badge">ACTIVE</div>
+                `;
+                loanList.appendChild(div);
+            });
+        } catch (err) {
+            loanList.innerHTML = "<p style='color:red; text-align:center;'>Database Error. Please refresh.</p>";
+            console.error(err);
         }
-    });
-}
+    } else {
+        window.location.href = "index.html";
+    }
+});
 
-// Handle Logout
-const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-        signOut(auth).then(() => {
-            window.location.href = "index.html";
-        });
-    });
-}
-
-document.addEventListener("DOMContentLoaded", loadUserDashboard);
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    signOut(auth).then(() => window.location.href = "index.html");
+});
