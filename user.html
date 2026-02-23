@@ -39,6 +39,9 @@
         .loan-info h4 { margin: 0; font-size: 16px; color: var(--dark); }
         .loan-info p { margin: 5px 0 0; font-size: 13px; color: var(--secondary); }
 
+        .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        .status-active { background: #dcfce7; color: #166534; }
+
         @media (max-width: 1024px) {
             .sidebar { width: 80px; padding: 15px; }
             .sidebar h2, .sidebar p, .nav-item span { display: none; }
@@ -55,18 +58,18 @@
             <a href="history.html" class="nav-item"><span>Payment History</span></a>
             <a href="status.html" class="nav-item"><span>Current Status</span></a>
         </nav>
-        <div class="nav-item" style="color: #f87171; margin-top: auto;" onclick="logout()">Logout</div>
+        <div class="nav-item" style="color: #f87171; margin-top: auto;" id="logoutBtn">Logout</div>
     </aside>
 
     <main class="main-container">
         <div class="header-bar">
-            <h1>Active Loan Portfolio [cite: 150]</h1>
+            <h1>Active Loan Portfolio</h1>
             <p style="color: var(--secondary);">View your current outstanding balances and loan details.</p>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h3>Your Current Loans </h3>
+                <h3>Your Current Loans</h3>
             </div>
             <div id="loans">
                 <p style="text-align: center; color: var(--secondary); padding: 20px;">Fetching your loan details...</p>
@@ -77,11 +80,11 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h3 style="margin:0; color: var(--primary);">Official Contact</h3>
-                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">For queries, contact our office.</p>
+                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">For queries, contact our office[cite: 136].</p>
                 </div>
                 <div style="text-align: right;">
-                    <p style="margin:0; font-weight: 700;">Chudasama Baldevsinh [cite: 136]</p>
-                    <p style="margin:5px 0 0; color: var(--primary); font-size: 18px;">+91 9924232759 [cite: 137]</p>
+                    <p style="margin:0; font-weight: 700;">Chudasama Baldevsinh [cite: 65, 136]</p>
+                    <p style="margin:5px 0 0; color: var(--primary); font-size: 18px;">+91 9924232759 [cite: 65, 137]</p>
                 </div>
             </div>
         </div>
