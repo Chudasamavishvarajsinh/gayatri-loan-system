@@ -4,22 +4,18 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 
 const historyTable = document.getElementById("historyTable");
 
-// Function to fetch and display the loan archive
 async function loadHistory(user) {
     try {
-        // Query to get all loans for the logged-in user
+        if (!db) throw new Error("Database connection failed");
+
+        // Fetch all loans associated with this User ID
         const q = query(collection(db, "loans"), where("userId", "==", user.uid));
         const snapshot = await getDocs(q);
         
         historyTable.innerHTML = "";
         
         if (snapshot.empty) {
-            historyTable.innerHTML = `
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
-                        No transaction history found.
-                    </td>
-                </tr>`;
+            historyTable.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#64748b;">No payment history records found.</td></tr>`;
             return;
         }
 
@@ -27,7 +23,7 @@ async function loadHistory(user) {
             const data = doc.data();
             const row = document.createElement("tr");
             
-            // Populate the table cells with database fields
+            // principal, status, meetingDate, and date are pulled from Firestore
             row.innerHTML = `
                 <td>₹${data.principal || 0}</td>
                 <td>
@@ -38,15 +34,14 @@ async function loadHistory(user) {
                 <td>${data.meetingDate || 'Not Fixed'}</td>
                 <td>${data.date || 'N/A'}</td>
             `;
-            historyTable.innerHTML += row.outerHTML;
+            historyTable.appendChild(row);
         });
     } catch (error) {
         console.error("History Error:", error);
-        historyTable.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>Failed to load history data.</td></tr>";
+        historyTable.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red;'>Error loading history.</td></tr>";
     }
 }
 
-// Ensure the user is logged in before fetching data
 onAuthStateChanged(auth, (user) => {
     if (user) {
         loadHistory(user);
