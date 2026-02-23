@@ -1,91 +1,47 @@
-console.log("NEW VERSION LOADED");
-import { auth, db } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js"; [cite: 147]
+import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"; [cite: 147]
 
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+async function loadUserDashboard() {
+    const loanContainer = document.getElementById("loans");
+    
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            // Fetch loans belonging only to this user
+            const q = query(collection(db, "loans"), where("userId", "==", user.uid));
+            const snapshot = await getDocs(q); [cite: 148]
+            
+            loanContainer.innerHTML = "";
+            
+            if (snapshot.empty) {
+                loanContainer.innerHTML = "<p style='text-align:center;'>No active loans found.</p>"; [cite: 149]
+                return;
+            }
 
-import {
-  collection,
-  query,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-window.logout = async function () {
-  await signOut(auth);
-  window.location = "index.html";
-};
-
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) {
-    window.location = "index.html";
-    return;
-  }
-
-  try {
-
-    const q = query(
-      collection(db, "loans"),
-      where("userId", "==", user.uid)
-    );
-
-    const snap = await getDocs(q);
-
-    const loansContainer = document.getElementById("loans");
-
-    if (snap.empty) {
-      loansContainer.innerHTML = "<p>No loans found.</p>";
-      return;
-    }
-
-    let html = `
-      <table border="1" width="100%" cellpadding="8">
-        <tr>
-          <th>Loan ID</th>
-          <th>Principal</th>
-          <th>Total With Interest</th>
-          <th>Remaining</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-    `;
-
-    snap.forEach((docSnap) => {
-
-      const d = docSnap.data();
-      const loanId = docSnap.id;
-
-      html += `
-        <tr>
-          <td>${loanId}</td>
-          <td>₹ ${d.principal}</td>
-          <td>₹ ${d.totalWithInterest}</td>
-          <td>₹ ${d.remainingAmount}</td>
-          <td>${d.status}</td>
-          <td>
-            <button onclick="viewLoan('${loanId}')">
-              View
-            </button>
-          </td>
-        </tr>
-      `;
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const loanItem = document.createElement("div");
+                loanItem.className = "loan-item";
+                loanItem.innerHTML = `
+                    <div class="loan-info">
+                        <h4>Loan Amount: ₹${data.principal}</h4>
+                        <p>Remaining Balance: ₹${data.remaining || data.totalPayable}</p>
+                    </div>
+                    <div class="status-badge status-active">
+                        ${data.status || 'Active'}
+                    </div>
+                `;
+                loanContainer.appendChild(loanItem);
+            });
+        } else {
+            window.location.href = "index.html";
+        }
     });
+}
 
-    html += `</table>`;
-
-    loansContainer.innerHTML = html;
-
-  } catch (error) {
-    console.error(error);
-    document.getElementById("loans").innerHTML =
-      "<p>Error loading loans.</p>";
-  }
-
-});
-
-window.viewLoan = function (loanId) {
-  window.location = `loan-details.html?loanId=${loanId}`;
+window.logout = () => {
+    auth.signOut().then(() => {
+        window.location.href = "index.html";
+    });
 };
+
+document.addEventListener("DOMContentLoaded", loadUserDashboard);
