@@ -63,9 +63,6 @@
         }
 
         .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 40px;
         }
 
@@ -92,9 +89,7 @@
             border-radius: 15px;
             margin-bottom: 15px;
             background: var(--light);
-            transition: 0.3s;
         }
-        .loan-item:hover { transform: scale(1.01); border-color: var(--primary); }
         
         .loan-info h4 { margin: 0; font-size: 16px; color: var(--dark); }
         .loan-info p { margin: 5px 0 0; font-size: 13px; color: var(--secondary); }
@@ -122,10 +117,9 @@
         <p>Electronic Services</p>
         
         <nav class="nav-menu">
-            <a href="user.html" class="nav-item active"><span>Dashboard</span></a>
-            <a href="apply.html" class="nav-item"><span>Apply for Loan</span></a>
-            <a href="history.html" class="nav-item"><span>Loan History</span></a>
-            <a href="status.html" class="nav-item"><span>Track Status</span></a>
+            <a href="user.html" class="nav-item active"><span>My Dashboard</span></a>
+            <a href="history.html" class="nav-item"><span>Payment History</span></a>
+            <a href="status.html" class="nav-item"><span>Current Status</span></a>
         </nav>
 
         <div class="nav-item" style="color: #f87171; margin-top: auto;" onclick="logout()">Logout</div>
@@ -133,29 +127,24 @@
 
     <main class="main-container">
         <div class="header-bar">
-            <div>
-                <h1 style="margin:0;">Dashboard</h1>
-                <p style="color: var(--secondary); margin: 5px 0 0 0;">Overview of your active loan accounts.</p>
-            </div>
-            <button onclick="window.location.href='apply.html'" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer;">
-                + New Application
-            </button>
+            <h1 style="margin:0;">Active Loan Portfolio</h1>
+            <p style="color: var(--secondary); margin: 5px 0 0 0;">View your current outstanding balances and loan details.</p>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h3>Current Active Loans</h3>
+                <h3>Your Current Loans</h3>
             </div>
             <div id="loans">
-                <p style="text-align: center; color: var(--secondary); padding: 20px;">Checking for active loans...</p>
+                <p style="text-align: center; color: var(--secondary); padding: 20px;">Fetching your loan details...</p>
             </div>
         </div>
 
         <div class="card" style="background: var(--dark); color: white; border: none;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h3 style="margin:0; color: var(--primary);">Need Assistance?</h3>
-                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">Contact our office for payment support.</p>
+                    <h3 style="margin:0; color: var(--primary);">Official Contact</h3>
+                    <p style="margin: 10px 0 0; font-size: 14px; color: #94a3b8;">For new loans or queries, contact our office.</p>
                 </div>
                 <div style="text-align: right;">
                     <p style="margin:0; font-weight: 700;">Chudasama Baldevsinh</p>
